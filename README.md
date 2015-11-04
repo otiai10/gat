@@ -1,0 +1,2 @@
+- https://github.com/fatih/color/blob/master/color.go
+- https://gist.github.com/MicahElliott/719710
