@@ -46,17 +46,17 @@ func run(filename string, stdout, stderr io.ReadWriter) {
 		panic(err)
 	}
 
+	// TODO: zoom
+	// TODO: or auto zoom by terminal
 	ratio := 4
 	aspect := 2
 
 	for row := 0; row < img.Bounds().Max.Y/ratio; row++ {
 		for col := 0; col < img.Bounds().Max.X/ratio; col++ {
-			r, g, b, a := img.At(col*ratio, row*ratio).RGBA()
+			r, g, b, a := img.At(col*ratio+2, row*ratio+2).RGBA() // FIXME: 微調整
 			for i := 0; i < aspect; i++ {
-				fmt.Fprintf(stdout, "\x1b[48;5;%sm \x1b[m", colors.GetCodeByRGBA(r, g, b, a)) // it works well
-				// fmt.Fprintf(stdout, "\x1b[48;5;%[1]dm \x1b[m", r) // it works well
+				fmt.Fprintf(stdout, "\x1b[48;5;%sm \x1b[m", colors.GetCodeByRGBA(r, g, b, a))
 			}
-			// fmt.Printf("R:%d\tG:%d\tB:%d\tA:%d\n", r, g, b, a)
 		}
 		fmt.Fprint(stdout, "\n")
 	}

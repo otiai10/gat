@@ -1,30 +1,58 @@
 package colors
 
+// RGB2Hex ...
 func RGB2Hex(r, g, b uint32) uint32 {
 	return (r>>8)<<16 | (g>>8)<<8 | (b >> 8)
 }
 
+// GetCodeByRGBA ...
 func GetCodeByRGBA(r, g, b, a uint32) string {
 	h := RGB2Hex(r, g, b)
 	if code, ok := colormap[h]; ok {
 		return code
 	}
-	var d uint32
-	for {
-		d++
-		if code, ok := colormap[h-d]; ok {
-			colormap[h] = code
-			return code
+	appr := FindApproximateColorCode(r, g, b)
+	colormap[h] = appr
+	return appr
+}
+
+// FindApproximateColorCode ...
+func FindApproximateColorCode(r, g, b uint32) string {
+	h := RGB2Hex(
+		getNearestHex(r),
+		getNearestHex(g),
+		getNearestHex(b),
+	)
+	if code, ok := colormap[h]; ok {
+		return code
+	}
+	/*
+		var d uint32
+		for {
+			d++
+			if code, ok := colormap[h-d]; ok {
+				colormap[h] = code
+				return code
+			}
+			if code, ok := colormap[h+d]; ok {
+				colormap[h] = code
+				return code
+			}
+			if d > 16*16*16*16*16 {
+				break
+			}
 		}
-		if code, ok := colormap[h+d]; ok {
-			colormap[h] = code
-			return code
-		}
-		if d > 16*16*16*16*16 {
-			break
+	*/
+	return "13"
+}
+
+func getNearestHex(x uint32) uint32 {
+	for _, comp := range patterns["GENERAL"] {
+		if x < comp {
+			return comp
 		}
 	}
-	return "13"
+	return 0xff
 }
 
 var colormap = map[uint32]string{
@@ -48,7 +76,7 @@ var colormap = map[uint32]string{
 	0x00ffff: "14",
 	0xffffff: "15",
 
-	// Strictly ascending.
+	// {{{ GENERAL group
 	// 0x000000: "16",
 	0x00005f: "17",
 	0x000087: "18",
@@ -265,6 +293,7 @@ var colormap = map[uint32]string{
 	0xffffaf: "229",
 	0xffffd7: "230",
 	// 0xffffff: "231",
+	// GENERAL group }}}
 
 	// Gray-scale range.
 	0x080808: "232",
@@ -291,4 +320,15 @@ var colormap = map[uint32]string{
 	0xdadada: "253",
 	0xe4e4e4: "254",
 	0xeeeeee: "255",
+}
+
+// どうやらパターンはそれほどない. 256色だもんね
+var patterns = map[string][]uint32{
+	"GENERAL": []uint32{
+		0x0000,
+		0x5f00,
+		0xaf00,
+		0xd700,
+		0xff00,
+	},
 }
