@@ -25,7 +25,9 @@ func run(stdout, stderr io.ReadWriter) {
 	t := getTerminal()
 	for r := 0; r < int(t.Row); r++ {
 		for c := 0; c < int(t.Col)-1; c++ {
-			fmt.Print("\x1b[42m")
+			fmt.Printf("\x1b[48;5;%dm \x1b[m", r)
+            // fmt.Print("%K[42m%k") not work
+            // fmt.Print("\x1b%K{42}%k")
 		}
 		fmt.Print("#\n")
 	}

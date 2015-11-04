@@ -1,2 +1,5 @@
 - https://github.com/fatih/color/blob/master/color.go
 - https://gist.github.com/MicahElliott/719710
+- http://hiroki.jp/2012/06/17/4398/
+- http://www.m-bsys.com/linux/echo-color-1
+- http://qiita.com/mollifier/items/40d57e1da1b325903659
