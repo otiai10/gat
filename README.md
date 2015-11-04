@@ -3,3 +3,4 @@
 - http://hiroki.jp/2012/06/17/4398/
 - http://www.m-bsys.com/linux/echo-color-1
 - http://qiita.com/mollifier/items/40d57e1da1b325903659
+- http://d.hatena.ne.jp/zariganitosh/20150224/escape_sequence
