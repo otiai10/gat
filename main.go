@@ -26,8 +26,8 @@ func run(stdout, stderr io.ReadWriter) {
 	for r := 0; r < int(t.Row); r++ {
 		for c := 0; c < int(t.Col)-1; c++ {
 			fmt.Printf("\x1b[48;5;%dm \x1b[m", r)
-            // fmt.Print("%K[42m%k") not work
-            // fmt.Print("\x1b%K{42}%k")
+			// fmt.Print("%K[42m%k") not work
+			// fmt.Print("\x1b%K{42}%k")
 		}
 		fmt.Print("#\n")
 	}
@@ -44,6 +44,13 @@ func run(stdout, stderr io.ReadWriter) {
 
 	log.Println(img.Bounds().Max.X, img.Bounds().Max.Y, format)
 	log.Println(t.Col, t.Xpixel, t.Row, t.Ypixel)
+
+	for r := 0; r < img.Bounds().Max.Y/10; r++ {
+		for c := 0; c < img.Bounds().Max.X/5; c++ {
+			fmt.Printf("\x1b[48;5;%dm \x1b[m", r)
+		}
+		fmt.Print("\n")
+	}
 }
 
 type terminal struct {
