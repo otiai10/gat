@@ -45,9 +45,16 @@ func run(stdout, stderr io.ReadWriter) {
 	log.Println(img.Bounds().Max.X, img.Bounds().Max.Y, format)
 	log.Println(t.Col, t.Xpixel, t.Row, t.Ypixel)
 
-	for r := 0; r < img.Bounds().Max.Y/10; r++ {
-		for c := 0; c < img.Bounds().Max.X/5; c++ {
-			fmt.Printf("\x1b[48;5;%dm \x1b[m", r)
+	ratio := 4
+
+	for row := 0; row < img.Bounds().Max.Y/ratio; row++ {
+		for col := 0; col < img.Bounds().Max.X/ratio; col++ {
+			r, g, b, _ := img.At(col*ratio, row*ratio).RGBA()
+			if r == 0 && g == 0 && b == 0 {
+				fmt.Printf("\x1b[48;5;%dm \x1b[m", 0)
+			} else {
+				fmt.Printf("\x1b[48;5;%[1]dm \x1b[m", r)
+			}
 		}
 		fmt.Print("\n")
 	}
