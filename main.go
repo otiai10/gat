@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"io"
-	"log"
 	"os"
 	"syscall"
 	"unsafe"
@@ -18,45 +17,45 @@ var (
 )
 
 func main() {
-	run(defaultOut, defaultErr)
+	stdout, stderr := defaultOut, defaultErr
+	if len(os.Args) < 2 {
+		fmt.Fprint(stderr, "filename required")
+		return
+	}
+	filename := os.Args[1]
+	run(filename, stdout, stderr)
 }
 
-func run(stdout, stderr io.ReadWriter) {
-	t := getTerminal()
-	for r := 0; r < int(t.Row); r++ {
-		for c := 0; c < int(t.Col)-1; c++ {
-			fmt.Printf("\x1b[48;5;%dm \x1b[m", r)
-			// fmt.Print("%K[42m%k") not work
-			// fmt.Print("\x1b%K{42}%k")
+func run(filename string, stdout, stderr io.ReadWriter) {
+	for i := 0; i < 256; i++ {
+		fmt.Printf("\x1b[48;5;%dm%03d\x1b[m", i, i)
+		if i%15 == 0 {
+			fmt.Print("\n")
 		}
-		fmt.Print("#\n")
 	}
 
-	f, err := os.Open("gopher.png")
+	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)
 	}
 
-	img, format, err := image.Decode(f)
+	img, _, err := image.Decode(f)
 	if err != nil {
 		panic(err)
 	}
-
-	log.Println(img.Bounds().Max.X, img.Bounds().Max.Y, format)
-	log.Println(t.Col, t.Xpixel, t.Row, t.Ypixel)
 
 	ratio := 4
+	aspect := 2
 
 	for row := 0; row < img.Bounds().Max.Y/ratio; row++ {
 		for col := 0; col < img.Bounds().Max.X/ratio; col++ {
-			r, g, b, _ := img.At(col*ratio, row*ratio).RGBA()
-			if r == 0 && g == 0 && b == 0 {
-				fmt.Printf("\x1b[48;5;%dm \x1b[m", 0)
-			} else {
-				fmt.Printf("\x1b[48;5;%[1]dm \x1b[m", r)
+			r, _, _, _ := img.At(col*ratio, row*ratio).RGBA()
+			for i := 0; i < aspect; i++ {
+				// fmt.Fprintf(stdout, "\x1b[48;5;%[1]dm %[1]d\x1b[m", r) // it works well
+				fmt.Fprintf(stdout, "\x1b[48;5;%[1]dm \x1b[m", r) // it works well
 			}
 		}
-		fmt.Print("\n")
+		fmt.Fprint(stdout, "\n")
 	}
 }
 
