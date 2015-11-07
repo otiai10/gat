@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"io"
-	"log"
 	"os"
 
 	"github.com/otiai10/gcat"
@@ -26,7 +25,6 @@ func main() {
 	flag.IntVar(&col, "col", 0, "col")
 	flag.IntVar(&row, "row", 0, "row")
 	flag.Parse()
-	log.Println(col, row)
 	stdout, stderr := defaultOut, defaultErr
 	if len(os.Args) < 2 {
 		fmt.Fprint(stderr, "filename required")
@@ -36,17 +34,7 @@ func main() {
 	run(filename, stdout, stderr)
 }
 
-func colorcheck() {
-	for i := 0; i < 256; i++ {
-		gcat.Fprint(os.Stdout, i, fmt.Sprintf("%03d", i))
-		if i%15 == 0 {
-			fmt.Print("\n")
-		}
-	}
-
-}
 func run(filename string, stdout, stderr io.ReadWriter) {
-	colorcheck()
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -58,16 +46,14 @@ func run(filename string, stdout, stderr io.ReadWriter) {
 		panic(err)
 	}
 
-	log.Println(col, row)
-
 	var client *gcat.Client
 	switch {
 	case col > 0:
-		client = gcat.OfTerminal()
+		client = gcat.Terminal()
 	case row > 0:
-		client = gcat.OfTerminal()
+		client = gcat.Terminal()
 	default:
-		client = gcat.OfTerminal()
+		client = gcat.Terminal()
 	}
 
 	// client := gcat.NewClient()

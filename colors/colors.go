@@ -1,5 +1,20 @@
 package colors
 
+import (
+	"fmt"
+	"io"
+)
+
+// Check ...
+func Check(out io.Writer) {
+	for i := 0; i < 256; i++ {
+		fmt.Fprintf(out, "\x1b[48;5;%[1]dm%%03[1]d\x1b[m", i)
+		if i%15 == 0 {
+			fmt.Print("\n")
+		}
+	}
+}
+
 // RGB2Hex ...
 func RGB2Hex(r, g, b uint32) uint32 {
 	return (r>>8)<<16 | (g>>8)<<8 | (b >> 8)
