@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/otiai10/gcat"
+	"github.com/otiai10/gat"
 
 	_ "image/png"
 )
@@ -42,18 +42,18 @@ func run(filename string, stdout, stderr io.ReadWriter) {
 		panic(err)
 	}
 
-	var client *gcat.Client
+	var client *gat.Client
 	switch {
 	/*
 		case col > 0:
-			client = gcat.Terminal()
+			client = gat.Terminal()
 		case row > 0:
-			client = gcat.Terminal()
+			client = gat.Terminal()
 	*/
 	default:
-		client = gcat.Terminal()
+		client = gat.Terminal()
 	}
 
-	// client := gcat.NewClient()
+	// client := gat.NewClient()
 	client.PrintImage(img)
 }

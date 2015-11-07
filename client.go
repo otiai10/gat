@@ -1,4 +1,4 @@
-package gcat
+package gat
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/otiai10/gcat/colors"
+	"github.com/otiai10/gat/colors"
 )
 
 // Client ...

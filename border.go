@@ -1,4 +1,4 @@
-package gcat
+package gat
 
 import (
 	"fmt"
