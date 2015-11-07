@@ -13,16 +13,16 @@ import (
 
 // Client ...
 type Client struct {
-	Output, Errput io.ReadWriter // Output platform
-	Canvas         Rect          // output canvas
-	Border         Border
+	Out, Err io.ReadWriter // Out platform
+	Canvas   Rect          // output canvas
+	Border   Border
 }
 
 // NewClient ...
 func NewClient(rect Rect) *Client {
 	return &Client{
-		Output: os.Stdout,
-		Errput: os.Stderr,
+		Out:    os.Stdout,
+		Err:    os.Stderr,
 		Canvas: rect,
 		Border: DefaultBorder{},
 		// Border: DebugBorder{},
@@ -40,21 +40,21 @@ func Terminal() *Client {
 }
 
 // Set ...
-func (client *Client) Set(attr interface{}) *Client {
+func (c *Client) Set(attr interface{}) *Client {
 	switch attr := attr.(type) {
 	case Border:
-		client.Border = attr
+		c.Border = attr
 	case Rect:
-		client.Canvas = attr
+		c.Canvas = attr
 	}
-	return client
+	return c
 }
 
 // PrintImage ...
-func (client *Client) PrintImage(img image.Image) error {
-	rowcount := int(client.Canvas.Row - 1)
+func (c *Client) PrintImage(img image.Image) error {
+	rowcount := int(c.Canvas.Row - 1)
 
-	for i := 0; i < client.Border.Width(); i++ {
+	for i := 0; i < c.Border.Width(); i++ {
 		rowcount--
 	}
 
@@ -64,28 +64,28 @@ func (client *Client) PrintImage(img image.Image) error {
 	cell := img.Bounds().Max.Y / rowcount
 
 	// Print top header
-	for col := 0; col < colcount+client.Border.Width(); col++ {
-		client.Border.Top(client.Output, col)
+	for col := 0; col < colcount+c.Border.Width(); col++ {
+		c.Border.Top(c.Out, col)
 	}
-	if client.Border.Width() > 0 { // FIXME
-		fmt.Fprint(client.Output, "\n")
+	if c.Border.Width() > 0 { // FIXME
+		fmt.Fprint(c.Out, "\n")
 	}
 
 	for row := 0; row < rowcount; row++ {
-		client.Border.Left(client.Output, row)
+		c.Border.Left(c.Out, row)
 		for col := 0; col < colcount; col++ {
 			r, g, b, a := img.At(col*cell+2, row*cell+2).RGBA() // FIXME: 微調整
-			// fmt.Fprintf(client.Output, "%02d", col)
-			Fprint(client.Output, colors.GetCodeByRGBA(r, g, b, a), "  ")
+			// fmt.Fprintf(c.Out, "%02d", col)
+			Fprint(c.Out, colors.GetCodeByRGBA(r, g, b, a), "  ")
 		}
-		client.Border.Right(client.Output, row)
-		// fmt.Fprintf(client.Output, "\n%02d", row)
-		fmt.Fprintf(client.Output, "\n")
+		c.Border.Right(c.Out, row)
+		// fmt.Fprintf(c.Out, "\n%02d", row)
+		fmt.Fprintf(c.Out, "\n")
 	}
 
 	// Print bottom footer
-	for col := 0; col < colcount+client.Border.Width(); col++ {
-		client.Border.Bottom(client.Output, col)
+	for col := 0; col < colcount+c.Border.Width(); col++ {
+		c.Border.Bottom(c.Out, col)
 	}
 
 	return nil
