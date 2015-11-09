@@ -30,10 +30,10 @@ func main() {
 	flag.Parse()
 	stdout, stderr := defaultOut, defaultErr
 	filename := flag.Arg(0)
-	run(filename, stdout, stderr)
+	run(filename, stdout, stderr, 0, 0)
 }
 
-func run(filename string, stdout, stderr io.ReadWriter) {
+func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -47,15 +47,22 @@ func run(filename string, stdout, stderr io.ReadWriter) {
 
 	var client *gat.Client
 	switch {
-	/*
-		case col > 0:
-			client = gat.Terminal()
-		case row > 0:
-			client = gat.Terminal()
-	*/
+	case col > 0:
+		client = gat.NewClient(gat.Rect{
+			Col: uint16(col),
+			Row: uint16(col * (img.Bounds().Max.Y / img.Bounds().Max.X)),
+		})
+	case row > 0:
+		client = gat.NewClient(gat.Rect{
+			Row: uint16(row),
+			Col: uint16(row * (img.Bounds().Max.X / img.Bounds().Max.Y)),
+		})
 	default:
 		client = gat.Terminal()
 	}
+
+	client.Out = stdout
+	client.Err = stderr
 
 	switch {
 	case debug:
