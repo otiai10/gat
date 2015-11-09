@@ -64,9 +64,7 @@ func (c *Client) PrintImage(img image.Image) error {
 	cell := img.Bounds().Max.Y / rowcount
 
 	// Print top header
-	for col := 0; col < colcount+c.Border.Width(); col++ {
-		c.Border.Top(c.Out, col)
-	}
+	c.Border.Top(c.Out, colcount+c.Border.Width())
 	if c.Border.Width() > 0 { // FIXME
 		fmt.Fprint(c.Out, "\n")
 	}
@@ -84,9 +82,7 @@ func (c *Client) PrintImage(img image.Image) error {
 	}
 
 	// Print bottom footer
-	for col := 0; col < colcount+c.Border.Width(); col++ {
-		c.Border.Bottom(c.Out, col)
-	}
+	c.Border.Bottom(c.Out, colcount+c.Border.Width())
 
 	return nil
 }
