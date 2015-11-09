@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	defaultOut = os.Stdout
-	defaultErr = os.Stderr
-	b          bool
+	defaultOut    = os.Stdout
+	defaultErr    = os.Stderr
+	border, debug bool
 )
 
 func init() {
@@ -25,7 +25,8 @@ func main() {
 		var w = flag.Int("w", 0, "cols")
 		var h = flag.Int("h", 0, "rows")
 	*/
-	flag.BoolVar(&b, "b", false, "border style")
+	flag.BoolVar(&border, "b", false, "border style")
+	flag.BoolVar(&debug, "debug", false, "debug mode")
 	flag.Parse()
 	stdout, stderr := defaultOut, defaultErr
 	filename := flag.Arg(0)
@@ -56,7 +57,10 @@ func run(filename string, stdout, stderr io.ReadWriter) {
 		client = gat.Terminal()
 	}
 
-	if b {
+	switch {
+	case debug:
+		client.Set(gat.DebugBorder{})
+	case border:
 		client.Set(gat.SimpleBorder{})
 	}
 
