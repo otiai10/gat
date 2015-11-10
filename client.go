@@ -13,20 +13,21 @@ import (
 
 // Client ...
 type Client struct {
-	Out, Err io.ReadWriter // Out platform
-	Canvas   Rect          // output canvas
-	Border   Border
+	Out, Err    io.ReadWriter // Out platform
+	Canvas      Rect          // output canvas
+	Border      Border
+	ColorPicker colors.Picker
 }
 
 // NewClient ...
 func NewClient(rect Rect) *Client {
 	return &Client{
-		Out:    os.Stdout,
-		Err:    os.Stderr,
-		Canvas: rect,
-		Border: DefaultBorder{},
-		// Border: DebugBorder{},
-		// Border: SimpleBorder{},
+		Out:         os.Stdout,
+		Err:         os.Stderr,
+		Canvas:      rect,
+		Border:      DefaultBorder{},
+		ColorPicker: colors.AverageColor,
+		// ColorPicker: colors.AverageColorX,
 	}
 }
 
@@ -72,9 +73,12 @@ func (c *Client) PrintImage(img image.Image) error {
 	for row := 0; row < rowcount; row++ {
 		c.Border.Left(c.Out, row)
 		for col := 0; col < colcount; col++ {
-			r, g, b, a := img.At(int(float64(col)*cell)+2, int(float64(row)*cell)+2).RGBA() // FIXME: 微調整
+			r, g, b, _ := c.ColorPicker(img, image.Rectangle{
+				Min: image.Point{int(float64(col) * cell), int(float64(row) * cell)},
+				Max: image.Point{int(float64(col+1)*cell) - 1, int(float64(row+1)*cell) - 1},
+			})
 			// fmt.Fprintf(c.Out, "%02d", col)
-			Fprint(c.Out, colors.GetCodeByRGBA(r, g, b, a), "  ")
+			Fprint(c.Out, colors.GetCodeByRGBA(r, g, b, 0), "  ")
 		}
 		c.Border.Right(c.Out, row)
 		// fmt.Fprintf(c.Out, "\n%02d", row)
