@@ -1,7 +1,7 @@
 gat
 ===========
 
-Graphical cat command
+Graphical `cat` command
 
 ```sh
 gat ritsu.png
@@ -24,6 +24,12 @@ gat -h 20 [imagefile] # output height will be about 20 rows
 gat -w 40 [imagefile] # output width will be about 40 cols
 gat -debug [imagefile] # with indexing cells
 ```
+
+# issues
+
+https://github.com/otiai10/gat/issues
+
+# thanks
 
 - https://github.com/fatih/color/blob/master/color.go
 - https://gist.github.com/MicahElliott/719710
