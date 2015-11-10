@@ -60,8 +60,8 @@ func (c *Client) PrintImage(img image.Image) error {
 
 	colcount := int(float64(rowcount) * float64(img.Bounds().Max.X) / float64(img.Bounds().Max.Y))
 
-	// ratio := img.Bounds().Max.Y / rowcount
-	cell := img.Bounds().Max.Y / rowcount
+	// cell := img.Bounds().Max.Y / rowcount
+	cell := float64(img.Bounds().Max.Y) / float64(rowcount)
 
 	// Print top header
 	c.Border.Top(c.Out, colcount+c.Border.Width())
@@ -72,7 +72,7 @@ func (c *Client) PrintImage(img image.Image) error {
 	for row := 0; row < rowcount; row++ {
 		c.Border.Left(c.Out, row)
 		for col := 0; col < colcount; col++ {
-			r, g, b, a := img.At(col*cell+2, row*cell+2).RGBA() // FIXME: 微調整
+			r, g, b, a := img.At(int(float64(col)*cell)+2, int(float64(row)*cell)+2).RGBA() // FIXME: 微調整
 			// fmt.Fprintf(c.Out, "%02d", col)
 			Fprint(c.Out, colors.GetCodeByRGBA(r, g, b, a), "  ")
 		}
