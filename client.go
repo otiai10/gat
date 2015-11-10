@@ -47,6 +47,8 @@ func (c *Client) Set(attr interface{}) *Client {
 		c.Border = attr
 	case Rect:
 		c.Canvas = attr
+	case colors.Picker:
+		c.ColorPicker = attr
 	}
 	return c
 }

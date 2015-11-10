@@ -7,9 +7,12 @@ type Picker func(image.Image, image.Rectangle) (r, g, b, a uint32)
 
 // AverageColor ...
 func AverageColor(src image.Image, cell image.Rectangle) (r, g, b, a uint32) {
-	var red, green, blue, alpha uint32
 	width := cell.Max.X - cell.Min.X
 	height := cell.Max.Y - cell.Min.Y
+	if width*height == 0 {
+		return src.At(cell.Min.X, cell.Min.Y).RGBA()
+	}
+	var red, green, blue, alpha uint32
 	for x := cell.Min.X; x < cell.Max.X; x++ {
 		for y := cell.Min.Y; y < cell.Max.Y; y++ {
 			r, g, b, a := src.At(x, y).RGBA()
