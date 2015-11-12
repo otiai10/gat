@@ -8,7 +8,7 @@ import (
 // Check ...
 func Check(out io.Writer) {
 	for i := 0; i < 256; i++ {
-		fmt.Fprintf(out, "\x1b[48;5;%[1]dm%%03[1]d\x1b[m", i)
+		fmt.Fprintf(out, "\x1b[48;5;%[1]dm %03[1]d\x1b[m", i)
 		if i%15 == 0 {
 			fmt.Print("\n")
 		}
@@ -58,7 +58,7 @@ func FindApproximateColorCode(r, g, b uint32) int {
 			}
 		}
 	*/
-	return 13
+	return 200
 }
 
 func getNearestHex(x uint32) uint32 {

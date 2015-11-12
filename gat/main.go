@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/otiai10/gat"
+	"github.com/otiai10/gat/colors"
 
 	_ "image/gif"
 	_ "image/jpeg"
@@ -72,6 +73,7 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 
 	switch {
 	case debug:
+		colors.Check(stdout)
 		client.Set(gat.DebugBorder{})
 	case border:
 		client.Set(gat.SimpleBorder{})
