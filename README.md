@@ -7,7 +7,7 @@ Graphical `cat` command
 gat ritsu.png
 ```
 
-![](https://cloud.githubusercontent.com/assets/931554/11054870/4c0d8206-87b4-11e5-9b23-60d4262686c1.png)
+![](https://cloud.githubusercontent.com/assets/931554/11237374/e3ecf3f8-8e22-11e5-8131-e2abf84ffbd9.png)
 
 # install
 
