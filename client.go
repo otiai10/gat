@@ -11,6 +11,9 @@ import (
 	"github.com/otiai10/gat/colors"
 )
 
+// Cell represents a cell expression of output
+const Cell = "  "
+
 // Client ...
 type Client struct {
 	Out, Err    io.ReadWriter // Out platform
@@ -31,15 +34,6 @@ func NewClient(rect Rect) *Client {
 	}
 }
 
-// Terminal ...
-func Terminal() *Client {
-	t := getTerminal()
-	return NewClient(Rect{
-		Row: t.Row,
-		Col: t.Col,
-	})
-}
-
 // Set ...
 func (c *Client) Set(attr interface{}) *Client {
 	switch attr := attr.(type) {
@@ -55,10 +49,16 @@ func (c *Client) Set(attr interface{}) *Client {
 
 // PrintImage ...
 func (c *Client) PrintImage(img image.Image) error {
+	if c.Canvas.Row <= 1 || c.Canvas.Col <= 1 {
+		return fmt.Errorf("output canvas is too small: %+v", c.Canvas)
+	}
 	rowcount := int(c.Canvas.Row - 1)
 
 	for i := 0; i < c.Border.Width(); i++ {
 		rowcount--
+	}
+	if rowcount <= 0 {
+		rowcount = 1
 	}
 
 	colcount := int(float64(rowcount) * float64(img.Bounds().Max.X) / float64(img.Bounds().Max.Y))
@@ -80,7 +80,7 @@ func (c *Client) PrintImage(img image.Image) error {
 				Max: image.Point{int(float64(col+1)*cell) - 1, int(float64(row+1)*cell) - 1},
 			})
 			// fmt.Fprintf(c.Out, "%02d", col)
-			Fprint(c.Out, colors.GetCodeByRGBA(r, g, b, 0), "  ")
+			Fprint(c.Out, colors.GetCodeByRGBA(r, g, b, 0), Cell)
 		}
 		c.Border.Right(c.Out, row)
 		// fmt.Fprintf(c.Out, "\n%02d", row)
@@ -106,7 +106,8 @@ type Rect struct {
 	// Ypixel uint16
 }
 
-func getTerminal() *Rect {
+// GetTerminal ...
+func GetTerminal() Rect {
 	t := new(Rect)
 	retCode, _, err := syscall.Syscall(
 		syscall.SYS_IOCTL,
@@ -118,5 +119,5 @@ func getTerminal() *Rect {
 	if int(retCode) == -1 {
 		panic(err)
 	}
-	return t
+	return *t
 }

@@ -56,16 +56,25 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 	switch {
 	case col > 0:
 		client = gat.NewClient(gat.Rect{
-			Col: uint16(col),
+			Col: uint16(col), // restrict output canvas by given "col"
 			Row: uint16(float64(col) * (float64(img.Bounds().Max.Y) / float64(img.Bounds().Max.X))),
 		})
 	case row > 0:
 		client = gat.NewClient(gat.Rect{
-			Row: uint16(row),
+			Row: uint16(row), // restrict output canvas by given "row"
 			Col: uint16(float64(row) * (float64(img.Bounds().Max.X) / float64(img.Bounds().Max.Y))),
 		})
 	default:
-		client = gat.Terminal()
+		canvas, terminal := gat.Rect{}, gat.GetTerminal()
+		rAvailable, rSource := float64(terminal.Col)/float64(terminal.Row), float64(img.Bounds().Size().X)/float64(img.Bounds().Size().Y)
+		if rAvailable > rSource { // source image is vertically bigger than available canvas
+			canvas.Row = terminal.Row // restrict output canvas by current terminal's row
+			canvas.Col = uint16(float64(terminal.Row) * rSource / float64(len(gat.Cell)))
+		} else { // source image is horizontally bigger than available canvas
+			canvas.Col = terminal.Col // restrict output canvas by current terminal's col
+			canvas.Row = uint16(float64(terminal.Col) / rSource / float64(len(gat.Cell)))
+		}
+		client = gat.NewClient(canvas)
 	}
 
 	client.Out = stdout
@@ -79,6 +88,5 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 		client.Set(gat.SimpleBorder{})
 	}
 
-	// client := gat.NewClient()
-	client.PrintImage(img)
+	onerror(client.PrintImage(img))
 }
