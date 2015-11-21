@@ -20,12 +20,14 @@ var (
 	defaultErr    = os.Stderr
 	border, debug bool
 	w, h          int
+	picker        string
 )
 
 func init() {
 	flag.IntVar(&w, "w", 0, "Width of output (cols)")
 	flag.IntVar(&h, "h", 0, "Height of output (rows)")
 	flag.BoolVar(&border, "b", false, "Add border")
+	flag.StringVar(&picker, "p", "", "Color Picking")
 	flag.BoolVar(&debug, "debug", false, "Debug mode with cell index")
 	flag.Parse()
 }
@@ -86,6 +88,21 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 		client.Set(gat.DebugBorder{})
 	case border:
 		client.Set(gat.SimpleBorder{})
+	}
+
+	if picker != "" {
+		switch picker {
+		case "average":
+			client.Set(colors.AverageColorPicker{})
+		case "center":
+			client.Set(colors.CenterColorPicker{})
+		case "lefttop":
+			client.Set(colors.LeftTopColorPicker{})
+		case "horizontal":
+			client.Set(colors.HorizontalAverageColorPicker{})
+		default:
+			onerror(fmt.Errorf("unknown color picker name: %v", picker))
+		}
 	}
 
 	onerror(client.PrintImage(img))

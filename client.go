@@ -29,8 +29,7 @@ func NewClient(rect Rect) *Client {
 		Err:         os.Stderr,
 		Canvas:      rect,
 		Border:      DefaultBorder{},
-		ColorPicker: colors.AverageColor,
-		// ColorPicker: colors.AverageColorX,
+		ColorPicker: colors.AverageColorPicker{},
 	}
 }
 
@@ -75,7 +74,7 @@ func (c *Client) PrintImage(img image.Image) error {
 	for row := 0; row < rowcount; row++ {
 		c.Border.Left(c.Out, row)
 		for col := 0; col < colcount; col++ {
-			r, g, b, _ := c.ColorPicker(img, image.Rectangle{
+			r, g, b, _ := c.ColorPicker.Pick(img, image.Rectangle{
 				Min: image.Point{int(float64(col) * cell), int(float64(row) * cell)},
 				Max: image.Point{int(float64(col+1)*cell) - 1, int(float64(row+1)*cell) - 1},
 			})
