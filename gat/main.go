@@ -24,11 +24,12 @@ var (
 )
 
 func init() {
-	flag.IntVar(&w, "w", 0, "Width of output (cols)")
-	flag.IntVar(&h, "h", 0, "Height of output (rows)")
-	flag.BoolVar(&border, "b", false, "Add border")
-	flag.StringVar(&picker, "p", "", "Color Picking")
-	flag.BoolVar(&debug, "debug", false, "Debug mode with cell index")
+	terminal := gat.GetTerminal()
+	flag.IntVar(&w, "w", int(terminal.Col), descriptionWidth)
+	flag.IntVar(&h, "h", int(terminal.Row), descriptionHeight)
+	flag.BoolVar(&border, "b", false, descriptionBorder)
+	flag.StringVar(&picker, "p", "average", descriptionPicker)
+	flag.BoolVar(&debug, "debug", false, descriptionDebug)
 	flag.Parse()
 }
 
@@ -90,10 +91,8 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 		client.Set(gat.SimpleBorder{})
 	}
 
-	if picker != "" {
+	if picker != "average" {
 		switch picker {
-		case "average":
-			client.Set(colors.AverageColorPicker{})
 		case "center":
 			client.Set(colors.CenterColorPicker{})
 		case "lefttop":
@@ -107,3 +106,11 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 
 	onerror(client.PrintImage(img))
 }
+
+const (
+	descriptionWidth  = `Width of output canvas. Current terminal size in default.`
+	descriptionHeight = `Height of output canvas. Current terminal size in default.`
+	descriptionBorder = `Set border to output, such as ╔════════════════════╗`
+	descriptionPicker = `Set color picker. ["average" | "horizontal" | "center" | "lefttop"]`
+	descriptionDebug  = `Show debug output and debug border.`
+)
