@@ -20,14 +20,15 @@ var (
 	defaultErr    = os.Stderr
 	border, debug bool
 	w, h          int
-	picker        string
+	picker, cell  string
 )
 
 func init() {
 	flag.IntVar(&w, "w", 0, descriptionWidth)
 	flag.IntVar(&h, "h", 0, descriptionHeight)
 	flag.BoolVar(&border, "b", false, descriptionBorder)
-	flag.StringVar(&picker, "p", "average", descriptionPicker)
+	flag.StringVar(&picker, "picker", "average", descriptionPicker)
+	flag.StringVar(&cell, "cell", "  ", descriptionCell)
 	flag.BoolVar(&debug, "debug", false, descriptionDebug)
 	flag.Parse()
 }
@@ -54,6 +55,7 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 	img, _, err := image.Decode(f)
 	onerror(err)
 
+	gat.Cell = cell
 	var client *gat.Client
 	switch {
 	case col > 0:
@@ -68,7 +70,7 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 		})
 	default:
 		canvas, terminal := gat.Rect{}, gat.GetTerminal()
-		rAvailable, rSource := float64(terminal.Col)/float64(terminal.Row), float64(img.Bounds().Size().X)/float64(img.Bounds().Size().Y)
+		rAvailable, rSource := float64(terminal.Col)/float64(terminal.Row)/float64(len(gat.Cell)), float64(img.Bounds().Size().X)/float64(img.Bounds().Size().Y)
 		if rAvailable > rSource { // source image is vertically bigger than available canvas
 			canvas.Row = terminal.Row // restrict output canvas by current terminal's row
 			canvas.Col = uint16(float64(terminal.Row) * rSource / float64(len(gat.Cell)))
@@ -107,6 +109,7 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 }
 
 const (
+	descriptionCell   = `Cell for output. Output would be constructed with this text.`
 	descriptionWidth  = `Width of output canvas. Current terminal width in default.`
 	descriptionHeight = `Height of output canvas. Current terminal height in default.`
 	descriptionBorder = `Set border to output, such as ╔════════════════════╗`

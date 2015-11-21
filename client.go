@@ -12,7 +12,7 @@ import (
 )
 
 // Cell represents a cell expression of output
-const Cell = "  "
+var Cell = "  "
 
 // Client ...
 type Client struct {
@@ -94,6 +94,7 @@ func (c *Client) PrintImage(img image.Image) error {
 
 // Fprint ...
 func Fprint(w io.Writer, code int, text string) {
+	// fmt.Fprintf(w, "\x1b[48;5;%dm%s\x1b[m", code, text)
 	fmt.Fprintf(w, "\x1b[48;5;%dm%s\x1b[m", code, text)
 }
 
