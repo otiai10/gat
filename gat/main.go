@@ -24,9 +24,8 @@ var (
 )
 
 func init() {
-	terminal := gat.GetTerminal()
-	flag.IntVar(&w, "w", int(terminal.Col), descriptionWidth)
-	flag.IntVar(&h, "h", int(terminal.Row), descriptionHeight)
+	flag.IntVar(&w, "w", 0, descriptionWidth)
+	flag.IntVar(&h, "h", 0, descriptionHeight)
 	flag.BoolVar(&border, "b", false, descriptionBorder)
 	flag.StringVar(&picker, "p", "average", descriptionPicker)
 	flag.BoolVar(&debug, "debug", false, descriptionDebug)
@@ -108,8 +107,8 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 }
 
 const (
-	descriptionWidth  = `Width of output canvas. Current terminal size in default.`
-	descriptionHeight = `Height of output canvas. Current terminal size in default.`
+	descriptionWidth  = `Width of output canvas. Current terminal width in default.`
+	descriptionHeight = `Height of output canvas. Current terminal height in default.`
 	descriptionBorder = `Set border to output, such as ╔════════════════════╗`
 	descriptionPicker = `Set color picker. ["average" | "horizontal" | "center" | "lefttop"]`
 	descriptionDebug  = `Show debug output and debug border.`
