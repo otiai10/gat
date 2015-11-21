@@ -35,14 +35,16 @@ func (border DefaultBorder) Width() int {
 }
 
 // DebugBorder ...
-type DebugBorder struct{}
+type DebugBorder struct {
+	Padding string
+}
 
 // Top ...
 func (border DebugBorder) Top(out io.Writer, cols int) {
-	fmt.Fprint(out, "  ")
-	for c := 1; c < cols; c++ {
-		s := "  " + fmt.Sprintf("%d", c-1)
-		fmt.Fprintf(out, s[len(s)-2:])
+	fmt.Fprint(out, "  ") // keep space to row index on the left edge
+	for c := 1; c < cols-1; c++ {
+		s := "  " + border.Padding + fmt.Sprintf("%d", c-1)
+		fmt.Fprintf(out, s[len(s)-3:])
 	}
 }
 

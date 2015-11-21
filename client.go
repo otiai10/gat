@@ -5,6 +5,7 @@ import (
 	"image"
 	"io"
 	"os"
+	"strconv"
 	"syscall"
 	"unsafe"
 
@@ -20,6 +21,7 @@ type Client struct {
 	Canvas      Rect          // output canvas
 	Border      Border
 	ColorPicker colors.Picker
+	IsDebug     bool
 }
 
 // NewClient ...
@@ -43,6 +45,12 @@ func (c *Client) Set(attr interface{}) *Client {
 	case colors.Picker:
 		c.ColorPicker = attr
 	}
+	return c
+}
+
+// Debug ...
+func (c *Client) Debug(f bool) *Client {
+	c.IsDebug = f
 	return c
 }
 
@@ -79,7 +87,7 @@ func (c *Client) PrintImage(img image.Image) error {
 				Max: image.Point{int(float64(col+1)*cell) - 1, int(float64(row+1)*cell) - 1},
 			})
 			// fmt.Fprintf(c.Out, "%02d", col)
-			Fprint(c.Out, colors.GetCodeByRGBA(r, g, b, 0), Cell)
+			c.Fprint(c.Out, colors.GetCodeByRGBA(r, g, b, 0), Cell)
 		}
 		c.Border.Right(c.Out, row)
 		// fmt.Fprintf(c.Out, "\n%02d", row)
@@ -96,6 +104,16 @@ func (c *Client) PrintImage(img image.Image) error {
 func Fprint(w io.Writer, code int, text string) {
 	// fmt.Fprintf(w, "\x1b[48;5;%dm%s\x1b[m", code, text)
 	fmt.Fprintf(w, "\x1b[48;5;%dm%s\x1b[m", code, text)
+}
+
+// Fprint ...
+func (c *Client) Fprint(w io.Writer, code int, text string) {
+	if c.IsDebug {
+		text := "  " + Cell + strconv.Itoa(code)
+		fmt.Fprintf(w, "\x1b[48;5;%dm%s\x1b[m", code, text[len(text)-3:])
+	} else {
+		fmt.Fprintf(w, "\x1b[48;5;%dm%s\x1b[m", code, text)
+	}
 }
 
 // Rect ...

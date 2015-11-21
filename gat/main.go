@@ -56,18 +56,50 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 	onerror(err)
 
 	gat.Cell = cell
-	var client *gat.Client
+	client := &gat.Client{}
+
+	switch {
+	case debug:
+		gat.Cell = "   " // with length 3, to print 3 digit color code in cell.
+		colors.Check(stdout)
+		client.Set(gat.DebugBorder{Padding: gat.Cell}).Debug(true)
+	case border:
+		client.Set(gat.SimpleBorder{})
+	default:
+		client.Set(gat.DefaultBorder{})
+	}
+
+	switch picker {
+	case "center":
+		client.Set(colors.CenterColorPicker{})
+	case "lefttop":
+		client.Set(colors.LeftTopColorPicker{})
+	case "horizontal":
+		client.Set(colors.HorizontalAverageColorPicker{})
+	default:
+		client.Set(colors.AverageColorPicker{})
+	}
+
+	client.Out = stdout
+	client.Err = stderr
+
+	client.Canvas = getCanvas(col, row, img)
+
+	onerror(client.PrintImage(img))
+}
+
+func getCanvas(col, row int, img image.Image) gat.Rect {
 	switch {
 	case col > 0:
-		client = gat.NewClient(gat.Rect{
+		return gat.Rect{
 			Col: uint16(col), // restrict output canvas by given "col"
 			Row: uint16(float64(col) * (float64(img.Bounds().Max.Y) / float64(img.Bounds().Max.X))),
-		})
+		}
 	case row > 0:
-		client = gat.NewClient(gat.Rect{
+		return gat.Rect{
 			Row: uint16(row), // restrict output canvas by given "row"
 			Col: uint16(float64(row) * (float64(img.Bounds().Max.X) / float64(img.Bounds().Max.Y))),
-		})
+		}
 	default:
 		canvas, terminal := gat.Rect{}, gat.GetTerminal()
 		rAvailable, rSource := float64(terminal.Col)/float64(terminal.Row)/float64(len(gat.Cell)), float64(img.Bounds().Size().X)/float64(img.Bounds().Size().Y)
@@ -78,34 +110,8 @@ func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
 			canvas.Col = terminal.Col // restrict output canvas by current terminal's col
 			canvas.Row = uint16(float64(terminal.Col) / rSource / float64(len(gat.Cell)))
 		}
-		client = gat.NewClient(canvas)
+		return canvas
 	}
-
-	client.Out = stdout
-	client.Err = stderr
-
-	switch {
-	case debug:
-		colors.Check(stdout)
-		client.Set(gat.DebugBorder{})
-	case border:
-		client.Set(gat.SimpleBorder{})
-	}
-
-	if picker != "average" {
-		switch picker {
-		case "center":
-			client.Set(colors.CenterColorPicker{})
-		case "lefttop":
-			client.Set(colors.LeftTopColorPicker{})
-		case "horizontal":
-			client.Set(colors.HorizontalAverageColorPicker{})
-		default:
-			onerror(fmt.Errorf("unknown color picker name: %v", picker))
-		}
-	}
-
-	onerror(client.PrintImage(img))
 }
 
 const (
