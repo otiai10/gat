@@ -6,8 +6,6 @@ import (
 	"io"
 	"os"
 	"strconv"
-	"syscall"
-	"unsafe"
 
 	"github.com/otiai10/gat/colors"
 )
@@ -17,8 +15,8 @@ var Cell = "  "
 
 // Client ...
 type Client struct {
-	Out, Err    io.ReadWriter // Out platform
-	Canvas      Rect          // output canvas
+	Out, Err    io.Writer // Out platform
+	Canvas      Rect      // output canvas
 	Border      Border
 	ColorPicker colors.Picker
 	IsDebug     bool
@@ -122,20 +120,4 @@ type Rect struct {
 	Col uint16
 	// Xpixel uint16
 	// Ypixel uint16
-}
-
-// GetTerminal ...
-func GetTerminal() Rect {
-	t := new(Rect)
-	retCode, _, err := syscall.Syscall(
-		syscall.SYS_IOCTL,
-		uintptr(syscall.Stdin),
-		uintptr(syscall.TIOCGWINSZ),
-		uintptr(unsafe.Pointer(t)),
-	)
-
-	if int(retCode) == -1 {
-		panic(err)
-	}
-	return *t
 }
