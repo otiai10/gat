@@ -17,8 +17,8 @@ var Cell = "  "
 
 // Client ...
 type Client struct {
-	Out, Err    io.ReadWriter // Out platform
-	Canvas      Rect          // output canvas
+	Out, Err    io.Writer // Out platform
+	Canvas      Rect      // output canvas
 	Border      Border
 	ColorPicker colors.Picker
 	IsDebug     bool
