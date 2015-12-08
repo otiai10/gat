@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/mattn/go-colorable"
 	"github.com/otiai10/gat"
 	"github.com/otiai10/gat/colors"
 
@@ -16,8 +17,8 @@ import (
 )
 
 var (
-	defaultOut    = os.Stdout
-	defaultErr    = os.Stderr
+	defaultOut    = colorable.NewColorableStdout()
+	defaultErr    = colorable.NewColorableStderr()
 	border, debug bool
 	w, h          int
 	picker, cell  string
@@ -47,7 +48,7 @@ func onerror(err error) {
 	os.Exit(1)
 }
 
-func run(filename string, stdout, stderr io.ReadWriter, col, row int) {
+func run(filename string, stdout, stderr io.Writer, col, row int) {
 
 	f, err := os.Open(filename)
 	onerror(err)
