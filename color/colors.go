@@ -1,12 +1,12 @@
-package colors
+package color
 
 import (
 	"fmt"
 	"io"
 )
 
-// Check ...
-func Check(out io.Writer) {
+// Dump ...
+func Dump(out io.Writer) {
 	for i := 0; i < 256; i++ {
 		fmt.Fprintf(out, "\x1b[48;5;%[1]dm %03[1]d\x1b[m", i)
 		if i%15 == 0 {
@@ -33,11 +33,7 @@ func GetCodeByRGBA(r, g, b, a uint32) int {
 
 // FindApproximateColorCode ...
 func FindApproximateColorCode(r, g, b uint32) int {
-	h := RGB2Hex(
-		getNearestHex(r),
-		getNearestHex(g),
-		getNearestHex(b),
-	)
+	h := RGB2Hex(getNearestHex(r), getNearestHex(g), getNearestHex(b))
 	if code, ok := colormap[h]; ok {
 		return code
 	}
@@ -337,7 +333,6 @@ var colormap = map[uint32]int{
 	0xeeeeee: 255,
 }
 
-// どうやらパターンはそれほどない. 256色だもんね
 var patterns = map[string][]uint32{
 	"GENERAL": []uint32{
 		0x0000,

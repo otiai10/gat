@@ -2,14 +2,16 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"image"
 	"io"
+	"log"
 	"os"
 
-	"github.com/mattn/go-colorable"
-	"github.com/otiai10/gat"
-	"github.com/otiai10/gat/colors"
+	"github.com/otiai10/gat/border"
+
+	"github.com/otiai10/gat/color"
+	"github.com/otiai10/gat/render"
+	"github.com/otiai10/gat/terminal"
 
 	_ "image/gif"
 	_ "image/jpeg"
@@ -17,109 +19,88 @@ import (
 )
 
 var (
-	defaultOut    = colorable.NewColorableStdout()
-	defaultErr    = colorable.NewColorableStderr()
-	border, debug bool
-	w, h          int
-	picker, cell  string
+	debug       = false
+	h           = 0
+	w           = 0
+	printborder = false
+	placeholder = "  "
 )
 
 func init() {
-	flag.IntVar(&w, "w", 0, descriptionWidth)
-	flag.IntVar(&h, "h", 0, descriptionHeight)
-	flag.BoolVar(&border, "b", false, descriptionBorder)
-	flag.StringVar(&picker, "picker", "average", descriptionPicker)
-	flag.StringVar(&cell, "cell", "  ", descriptionCell)
-	flag.BoolVar(&debug, "debug", false, descriptionDebug)
+	flag.BoolVar(&debug, "debug", false, "Print debug information")
+	flag.IntVar(&h, "H", 0, "Height of output")
+	flag.IntVar(&w, "W", 0, "Width of output")
+	flag.BoolVar(&printborder, "b", false, "Print border")
+	flag.StringVar(&placeholder, "s", "  ", "Placeholder text for grid cell")
 	flag.Parse()
 }
 
 func main() {
-	stdout, stderr := defaultOut, defaultErr
+	stdout, stderr := os.Stdout, os.Stderr
 	filename := flag.Arg(0)
-	run(filename, stdout, stderr, w, h)
+	run(filename, stdout, stderr, h, w)
 }
 
-func onerror(err error) {
-	if err == nil {
-		return
+func run(filename string, stdout, stderr io.Writer, row, col int) {
+
+	if debug {
+		color.Dump(stderr)
+		if filename == "" {
+			return
+		}
 	}
-	fmt.Println(err)
-	os.Exit(1)
-}
-
-func run(filename string, stdout, stderr io.Writer, col, row int) {
 
 	f, err := os.Open(filename)
-	onerror(err)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	img, _, err := image.Decode(f)
-	onerror(err)
-
-	gat.Cell = cell
-	client := &gat.Client{}
-
-	switch {
-	case debug:
-		gat.Cell = "   " // with length 3, to print 3 digit color code in cell.
-		colors.Check(stdout)
-		client.Set(gat.DebugBorder{Padding: gat.Cell}).Debug(true)
-	case border:
-		client.Set(gat.SimpleBorder{})
-	default:
-		client.Set(gat.DefaultBorder{})
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	switch picker {
-	case "center":
-		client.Set(colors.CenterColorPicker{})
-	case "lefttop":
-		client.Set(colors.LeftTopColorPicker{})
-	case "horizontal":
-		client.Set(colors.HorizontalAverageColorPicker{})
-	default:
-		client.Set(colors.AverageColorPicker{})
+	rect := defineRectangle(row, col, len(placeholder), img)
+
+	renderer := &render.CellGrid{
+		Row:         rect.Row,
+		Col:         rect.Col,
+		Colorpicker: color.AverageColorPicker{},
+		Placeholder: placeholder,
+		Debug:       debug,
+	}
+	if printborder {
+		renderer.Border = border.SimpleBorder{}
 	}
 
-	client.Out = stdout
-	client.Err = stderr
-
-	client.Canvas = getCanvas(col, row, img)
-
-	onerror(client.PrintImage(img))
+	if err := renderer.Render(stdout, img); err != nil {
+		log.Fatalln(err)
+	}
 }
 
-func getCanvas(col, row int, img image.Image) gat.Rect {
+func defineRectangle(row, col, cellwidth int, img image.Image) terminal.Rect {
 	switch {
-	case col > 0:
-		return gat.Rect{
-			Col: uint16(col), // restrict output canvas by given "col"
-			Row: uint16(float64(col) * (float64(img.Bounds().Max.Y) / float64(img.Bounds().Max.X))),
-		}
 	case row > 0:
-		return gat.Rect{
+		// Define reacangle by given row and the aspect ratio of source image.
+		return terminal.Rect{
 			Row: uint16(row), // restrict output canvas by given "row"
 			Col: uint16(float64(row) * (float64(img.Bounds().Max.X) / float64(img.Bounds().Max.Y))),
 		}
-	default:
-		canvas, terminal := gat.Rect{}, gat.GetTerminal()
-		rAvailable, rSource := float64(terminal.Col)/float64(terminal.Row)/float64(len(gat.Cell)), float64(img.Bounds().Size().X)/float64(img.Bounds().Size().Y)
-		if rAvailable > rSource { // source image is vertically bigger than available canvas
-			canvas.Row = terminal.Row // restrict output canvas by current terminal's row
-			canvas.Col = uint16(float64(terminal.Row) * rSource / float64(len(gat.Cell)))
-		} else { // source image is horizontally bigger than available canvas
-			canvas.Col = terminal.Col // restrict output canvas by current terminal's col
-			canvas.Row = uint16(float64(terminal.Col) / rSource / float64(len(gat.Cell)))
+	case col > 0:
+		// Define reacangle by given col and the aspect ratio of source image.
+		return terminal.Rect{
+			Col: uint16(col),
+			Row: uint16(float64(col) * (float64(img.Bounds().Max.Y) / float64(img.Bounds().Max.X))),
 		}
-		return canvas
+	default:
+		term := terminal.GetTerminal()
+		available := (float64(term.Col) / float64(cellwidth)) / float64(term.Row)
+		source := float64(img.Bounds().Size().X) / float64(img.Bounds().Size().Y)
+		if source > available {
+			term.Row = uint16(float64(term.Col) / source / float64(cellwidth))
+		} else {
+			term.Col = uint16(float64(term.Row) * source / float64(cellwidth))
+		}
+		return term
 	}
 }
-
-const (
-	descriptionCell   = `Cell for output. Output would be constructed with this text.`
-	descriptionWidth  = `Width of output canvas. Current terminal width in default.`
-	descriptionHeight = `Height of output canvas. Current terminal height in default.`
-	descriptionBorder = `Set border to output, such as ╔════════════════════╗`
-	descriptionPicker = `Set color picker. ["average" | "horizontal" | "center" | "lefttop"]`
-	descriptionDebug  = `Show debug output and debug border.`
-)

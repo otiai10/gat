@@ -4,38 +4,28 @@ gat
 Graphical `cat` command
 
 ```sh
-gat ritsu.png
+% gat example.png
 ```
 
-![](https://cloud.githubusercontent.com/assets/931554/11317166/b0b4a2ce-9066-11e5-8341-d536b22b656a.png)
+<img width="40%" src="https://cloud.githubusercontent.com/assets/931554/11317166/b0b4a2ce-9066-11e5-8341-d536b22b656a.png">
 
-# install
+# Install
 
 ```sh
 go get github.com/otiai10/gat/gat # <- gat/gat!
 ```
 
-# usage
+# Options
 
 ```sh
-gat [imagefile]
 gat -b [imagefile]    # with border
-gat -h 20 [imagefile] # output height will be about 20 rows
-gat -w 40 [imagefile] # output width will be about 40 cols
-gat -cell="**" [imagefile] # output will be constructed with this text
-gat -picker="center" [imagefile] # pick center color of output cell
+gat -H 20 [imagefile] # output height will be about 20 rows
+gat -W 40 [imagefile] # output width will be about 40 cols
+gat -s="**" [imagefile] # output will be constructed with this text
 gat -debug [imagefile] # with indexing cells
 ```
 
-# issues
-
-- https://github.com/otiai10/gat/issues
-
-# advanced projects
-
-- https://github.com/otiai10/amesh
-
-# thanks
+# Thanks
 
 - https://github.com/fatih/color/blob/master/color.go
 - https://gist.github.com/MicahElliott/719710

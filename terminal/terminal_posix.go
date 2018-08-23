@@ -1,6 +1,6 @@
 // +build !windows
 
-package gat
+package terminal
 
 import (
 	"syscall"
