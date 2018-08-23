@@ -7,8 +7,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/otiai10/gat/border"
-
 	"github.com/otiai10/gat/color"
 	"github.com/otiai10/gat/render"
 	"github.com/otiai10/gat/terminal"
@@ -19,11 +17,13 @@ import (
 )
 
 var (
-	debug       = false
-	h           = 0
-	w           = 0
-	printborder = false
-	placeholder = "  "
+	debug               = false
+	h                   = 0
+	w                   = 0
+	printborder         = false
+	placeholder         = "  "
+	scale       float64 = 1
+	usecell             = false
 )
 
 func init() {
@@ -31,7 +31,9 @@ func init() {
 	flag.IntVar(&h, "H", 0, "Height of output")
 	flag.IntVar(&w, "W", 0, "Width of output")
 	flag.BoolVar(&printborder, "b", false, "Print border")
-	flag.StringVar(&placeholder, "s", "  ", "Placeholder text for grid cell")
+	flag.StringVar(&placeholder, "t", "  ", "Placeholder text for grid cell")
+	flag.Float64Var(&scale, "s", 1, "Scale for iTerm image output")
+	flag.BoolVar(&usecell, "c", false, "Prefer cell grid output than terminal app")
 	flag.Parse()
 }
 
@@ -60,47 +62,30 @@ func run(filename string, stdout, stderr io.Writer, row, col int) {
 		log.Fatalln(err)
 	}
 
-	rect := defineRectangle(row, col, len(placeholder), img)
-
-	renderer := &render.CellGrid{
-		Row:         rect.Row,
-		Col:         rect.Col,
-		Colorpicker: color.AverageColorPicker{},
-		Placeholder: placeholder,
-		Debug:       debug,
-	}
-	if printborder {
-		renderer.Border = border.SimpleBorder{}
-	}
+	renderer := getRenderer(usecell, row, col, placeholder, scale, img)
 
 	if err := renderer.Render(stdout, img); err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func defineRectangle(row, col, cellwidth int, img image.Image) terminal.Rect {
+func getRenderer(usecell bool, row, col int, placeholder string, scale float64, img image.Image) render.Renderer {
 	switch {
-	case row > 0:
-		// Define reacangle by given row and the aspect ratio of source image.
-		return terminal.Rect{
-			Row: uint16(row), // restrict output canvas by given "row"
-			Col: uint16(float64(row) * (float64(img.Bounds().Max.X) / float64(img.Bounds().Max.Y))),
+	case !usecell && render.ITermImageSupported():
+		return &render.ITerm{
+			Scale: scale,
 		}
-	case col > 0:
-		// Define reacangle by given col and the aspect ratio of source image.
-		return terminal.Rect{
-			Col: uint16(col),
-			Row: uint16(float64(col) * (float64(img.Bounds().Max.Y) / float64(img.Bounds().Max.X))),
+	case !usecell && render.SixelSupported():
+		return &render.Sixel{
+			Scale: scale,
 		}
 	default:
-		term := terminal.GetTerminal()
-		available := (float64(term.Col) / float64(cellwidth)) / float64(term.Row)
-		source := float64(img.Bounds().Size().X) / float64(img.Bounds().Size().Y)
-		if source > available {
-			term.Row = uint16(float64(term.Col) / source / float64(cellwidth))
-		} else {
-			term.Col = uint16(float64(term.Row) * source / float64(cellwidth))
+		rect := terminal.DefineRectangle(row, col, len(placeholder), img)
+		return &render.CellGrid{
+			Row:         rect.Row,
+			Col:         rect.Col,
+			Colorpicker: color.AverageColorPicker{},
+			Placeholder: placeholder,
 		}
-		return term
 	}
 }
