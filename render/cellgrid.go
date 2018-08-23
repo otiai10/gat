@@ -8,6 +8,7 @@ import (
 
 	"github.com/otiai10/gat/border"
 	"github.com/otiai10/gat/color"
+	"github.com/otiai10/gat/terminal"
 )
 
 // CellGrid ...
@@ -38,15 +39,19 @@ type CellGrid struct {
 // Render renders specified image by using cell.
 func (grid *CellGrid) Render(w io.Writer, img image.Image) error {
 
-	if grid.Row <= 1 || grid.Col <= 1 {
-		return fmt.Errorf("output canvas is too small: %+v", grid)
-	}
-
 	if grid.Border == nil {
 		grid.Border = border.EmptyBorder{}
 	}
+	if grid.Colorpicker == nil {
+		grid.Colorpicker = color.AverageColorPicker{}
+	}
 
-	rowcount := int(grid.Row - 1)
+	rect := terminal.DefineRectangle(grid.Row, grid.Col, len(grid.Placeholder), img)
+	if rect.Row <= 1 || rect.Col <= 1 {
+		return fmt.Errorf("output canvas is too small: %+v", rect)
+	}
+
+	rowcount := int(rect.Row - 1)
 	// rowcount -= grid.Border.Width()
 	for i := 0; i < grid.Border.Width(); i++ {
 		rowcount--

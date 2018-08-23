@@ -13,7 +13,7 @@ type Rect struct {
 }
 
 // DefineRectangle ...
-func DefineRectangle(row, col, cellwidth int, img image.Image) Rect {
+func DefineRectangle(row, col uint16, cellwidth int, img image.Image) Rect {
 	switch {
 	case row > 0:
 		// Define reacangle by given row and the aspect ratio of source image.

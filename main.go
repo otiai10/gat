@@ -9,7 +9,6 @@ import (
 
 	"github.com/otiai10/gat/color"
 	"github.com/otiai10/gat/render"
-	"github.com/otiai10/gat/terminal"
 
 	_ "image/gif"
 	_ "image/jpeg"
@@ -80,10 +79,9 @@ func getRenderer(usecell bool, row, col int, placeholder string, scale float64, 
 			Scale: scale,
 		}
 	default:
-		rect := terminal.DefineRectangle(row, col, len(placeholder), img)
 		return &render.CellGrid{
-			Row:         rect.Row,
-			Col:         rect.Col,
+			Row:         uint16(row),
+			Col:         uint16(col),
 			Colorpicker: color.AverageColorPicker{},
 			Placeholder: placeholder,
 		}
