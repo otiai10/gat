@@ -10,7 +10,7 @@ import (
 
 func TestRun(t *testing.T) {
 	o, e := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
-	run("../samples/red.png", o, e, 2, 3)
+	run("./samples/red.png", o, e, 2, 3)
 
 	b, err := ioutil.ReadAll(o)
 	Expect(t, err).ToBe(nil)

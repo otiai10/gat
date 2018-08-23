@@ -12,7 +12,7 @@ Graphical `cat` command
 # Install
 
 ```sh
-go get github.com/otiai10/gat/gat # <- gat/gat!
+go get github.com/otiai10/gat
 ```
 
 # Options
