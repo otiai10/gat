@@ -20,11 +20,16 @@ go get github.com/otiai10/gat
 # Options
 
 ```sh
-gat -b [imagefile]    # with border
-gat -H 20 [imagefile] # output height will be about 20 rows
-gat -W 40 [imagefile] # output width will be about 40 cols
-gat -s="**" [imagefile] # output will be constructed with this text
-gat -debug [imagefile] # with indexing cells
+# iTerm and Sixel
+gat -s 0.5 [imagefile] # Scale of output image
+
+# Only for cell grid mode
+gat -c [imagefile]      # Use cell grid mode
+gat -H 20 [imagefile]   # Rows of output
+gat -W 40 [imagefile]   # Cols of output
+gat -b [imagefile]      # Print border
+gat -t="**" [imagefile] # Text to be printed for each cell
+gat -debug [imagefile]  # Dump available colors and color for each cell
 ```
 
 # Thanks
