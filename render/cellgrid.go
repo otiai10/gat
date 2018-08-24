@@ -45,6 +45,9 @@ func (grid *CellGrid) Render(w io.Writer, img image.Image) error {
 	if grid.Colorpicker == nil {
 		grid.Colorpicker = color.AverageColorPicker{}
 	}
+	if grid.Placeholder == "" {
+		grid.Placeholder = "  "
+	}
 
 	rect := terminal.DefineRectangle(grid.Row, grid.Col, len(grid.Placeholder), img)
 	if rect.Row <= 1 || rect.Col <= 1 {
