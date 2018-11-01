@@ -2,17 +2,20 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image"
-	"io"
-	"log"
-	"os"
-
-	"github.com/otiai10/gat/color"
-	"github.com/otiai10/gat/render"
-
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+
+	"github.com/otiai10/gat/color"
+	"github.com/otiai10/gat/render"
 )
 
 var (
@@ -39,32 +42,60 @@ func init() {
 func main() {
 	stdout, stderr := os.Stdout, os.Stderr
 	filename := flag.Arg(0)
-	run(filename, stdout, stderr, h, w)
+	err := run(filename, stdout, stderr, h, w)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
-func run(filename string, stdout, stderr io.Writer, row, col int) {
+func run(filename string, stdout, stderr io.Writer, row, col int) error {
 
 	if debug {
 		color.Dump(stderr)
 		if filename == "" {
-			return
+			return nil
 		}
 	}
 
-	f, err := os.Open(filename)
+	rc, err := getInputReader(filename)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
+	defer rc.Close()
 
-	img, _, err := image.Decode(f)
+	img, _, err := image.Decode(rc)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	renderer := getRenderer(usecell, row, col, placeholder, scale, img)
 
 	if err := renderer.Render(stdout, img); err != nil {
-		log.Fatalln(err)
+		return err
+	}
+	return nil
+}
+
+// Caller MUST Close response io.ReadCloser
+func getInputReader(filename string) (io.ReadCloser, error) {
+	u, err := url.Parse(filename)
+	if err != nil {
+		return nil, err
+	}
+	switch u.Scheme {
+	case "http", "https":
+		res, err := http.Get(u.String())
+		if err != nil {
+			return nil, err
+		}
+		contenttype := res.Header.Get("Content-Type")
+		if !strings.HasPrefix(contenttype, "image") {
+			res.Body.Close()
+			return nil, fmt.Errorf("Content-Type is not image/*, but %v", contenttype)
+		}
+		return res.Body, nil
+	default:
+		return os.Open(filename)
 	}
 }
 

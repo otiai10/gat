@@ -4,7 +4,11 @@ gat
 Graphical `cat` command
 
 ```sh
+# Local file
 % gat example.png
+
+# By URL
+% gat https://raw.githubusercontent.com/otiai10/gat/master/samples/sample.png
 ```
 
 | default | iTerm | Sixel |
