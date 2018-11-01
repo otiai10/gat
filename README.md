@@ -21,7 +21,7 @@ go get github.com/otiai10/gat
 
 ```sh
 # iTerm and Sixel
-gat -s 0.5 [imagefile] # Scale of output image
+gat -S 0.5 [imagefile] # Scale of output image
 
 # Only for cell grid mode
 gat -c [imagefile]      # Use cell grid mode

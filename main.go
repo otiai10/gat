@@ -29,9 +29,9 @@ func init() {
 	flag.BoolVar(&debug, "debug", false, "Print debug information")
 	flag.IntVar(&h, "H", 0, "Height of output")
 	flag.IntVar(&w, "W", 0, "Width of output")
+	flag.Float64Var(&scale, "S", 1, "Scale for iTerm image output")
 	flag.BoolVar(&printborder, "b", false, "Print border")
 	flag.StringVar(&placeholder, "t", "  ", "Placeholder text for grid cell")
-	flag.Float64Var(&scale, "s", 1, "Scale for iTerm image output")
 	flag.BoolVar(&usecell, "c", false, "Prefer cell grid output than terminal app")
 	flag.Parse()
 }
