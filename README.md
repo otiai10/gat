@@ -11,9 +11,9 @@ Graphical `cat` command
 % gat https://raw.githubusercontent.com/otiai10/gat/master/samples/sample.png
 ```
 
-| default | iTerm | Sixel |
+| in iTerm | in Sixel | "cell grid" mode (default) |
 |:-------:|:------:|:------:|
-| <img width="320px" src="https://cloud.githubusercontent.com/assets/931554/11317166/b0b4a2ce-9066-11e5-8341-d536b22b656a.png"> | <img width="320px" src="https://user-images.githubusercontent.com/931554/44513376-26ed8280-a6f8-11e8-83df-f1f877228189.png"> | supported but no image |
+| <img width="320px" src="https://user-images.githubusercontent.com/931554/44513376-26ed8280-a6f8-11e8-83df-f1f877228189.png"> | [waiting for PR] | <img width="320px" src="https://cloud.githubusercontent.com/assets/931554/11317166/b0b4a2ce-9066-11e5-8341-d536b22b656a.png"> |
 
 # Install
 
