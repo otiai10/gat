@@ -9,4 +9,5 @@ jobs:
     steps:
         - checkout
         - run: go get -u -v -t ./...
-        - run: go test -v -cover
+        - run: go test -v -race -coverprofile=coverage.txt -covermode=atomic
+        - run: bash <(curl -s https://codecov.io/bash)

@@ -12,4 +12,5 @@
 *.out
 
 vendor
+coverage.txt
 
