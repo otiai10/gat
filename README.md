@@ -1,6 +1,8 @@
 gat
 ===========
 
+[![CircleCI](https://circleci.com/gh/otiai10/gat.svg?style=svg)](https://circleci.com/gh/otiai10/gat)
+
 Graphical `cat` command
 
 ```sh
