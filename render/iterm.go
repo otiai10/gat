@@ -33,3 +33,9 @@ func (iterm *ITerm) Render(w io.Writer, img image.Image) error {
 	fmt.Fprintf(w, "\033]1337;File=;width=%dpx;height=%dpx;inline=1:%s\a\n", width, height, encoded)
 	return nil
 }
+
+// SetScale ...
+func (iterm *ITerm) SetScale(scale float64) error {
+	iterm.Scale = scale
+	return nil
+}

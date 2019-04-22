@@ -5,7 +5,7 @@ Graphical `cat` command
 
 ```sh
 # Local file
-% gat example.png
+% gat ./samples/sample.png
 
 # By URL
 % gat https://raw.githubusercontent.com/otiai10/gat/master/samples/sample.png
@@ -35,6 +35,17 @@ gat -b [imagefile]      # Print border
 gat -t="**" [imagefile] # Text to be printed for each cell
 gat -debug [imagefile]  # Dump available colors and color for each cell
 ```
+
+# As a library
+
+```go
+import "github.com/otiai10/gat/render"
+
+r := render.GetDefaultRenderer()
+r.Render(os.Stdout, img)
+```
+
+See https://godoc.org/github.com/otiai10/gat/render for more information.
 
 # Thanks
 

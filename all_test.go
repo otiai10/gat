@@ -14,5 +14,5 @@ func TestRun(t *testing.T) {
 
 	b, err := ioutil.ReadAll(o)
 	Expect(t, err).ToBe(nil)
-	Expect(t, len(b)).ToBe(15)
+	Expect(t, len(b)).ToBe(247)
 }

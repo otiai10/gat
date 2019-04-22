@@ -101,3 +101,8 @@ func (grid *CellGrid) Fprint(w io.Writer, code int) {
 		fmt.Fprintf(w, "\x1b[48;5;%dm%s\x1b[m", code, grid.Placeholder)
 	}
 }
+
+// SetScale ...
+func (grid *CellGrid) SetScale(scale float64) error {
+	return fmt.Errorf("CellGrid renderer doesn't support `scale`")
+}

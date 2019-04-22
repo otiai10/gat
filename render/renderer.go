@@ -13,6 +13,7 @@ import (
 // Renderer interface.
 type Renderer interface {
 	Render(io.Writer, image.Image) error
+	SetScale(float64) error
 }
 
 // ITermImageSupported ...
@@ -47,4 +48,16 @@ func SixelSupported() bool {
 		}
 	}
 	return false
+}
+
+// GetDefaultRenderer provides an applicable renderer for current platform.
+func GetDefaultRenderer() Renderer {
+	switch {
+	case ITermImageSupported():
+		return &ITerm{Scale: 1}
+	case SixelSupported():
+		return &Sixel{Scale: 1}
+	default:
+		return &CellGrid{}
+	}
 }

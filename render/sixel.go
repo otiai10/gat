@@ -23,3 +23,9 @@ func (sxl *Sixel) Render(w io.Writer, img image.Image) error {
 	resized := resize.Thumbnail(width, height, img, resize.Bicubic)
 	return sixel.NewEncoder(os.Stdout).Encode(resized)
 }
+
+// SetScale ...
+func (sxl *Sixel) SetScale(scale float64) error {
+	sxl.Scale = scale
+	return nil
+}
