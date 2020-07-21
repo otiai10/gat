@@ -1,7 +1,7 @@
 gat
 ===========
 
-[![CircleCI](https://circleci.com/gh/otiai10/gat.svg?style=svg)](https://circleci.com/gh/otiai10/gat)
+[![Go](https://github.com/otiai10/gat/workflows/Go/badge.svg)](https://github.com/otiai10/gat/actions)
 [![codecov](https://codecov.io/gh/otiai10/gat/branch/master/graph/badge.svg)](https://codecov.io/gh/otiai10/gat)
 
 Graphical `cat` command
