@@ -21,7 +21,7 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-    
+
     - name: Check go env
       run: |
         go env
@@ -41,9 +41,8 @@ jobs:
       run: |
         go test -v -race -coverprofile=coverage.txt -covermode=atomic \
         ./border ./color ./render ./terminal
-    
+
     - name: Upload coverage
-      run: |
-        bash <(curl -s https://codecov.io/bash)
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      uses: codecov/codecov-action@v1
+      with:
+        file: coverage.txt
