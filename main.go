@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"image"
@@ -26,6 +27,7 @@ var (
 	placeholder         = "  "
 	scale       float64 = 1
 	usecell             = false
+	interactive         = false
 )
 
 func init() {
@@ -36,6 +38,7 @@ func init() {
 	flag.BoolVar(&printborder, "b", false, "Print border")
 	flag.StringVar(&placeholder, "t", "  ", "Placeholder text for grid cell")
 	flag.BoolVar(&usecell, "c", false, "Prefer cell grid output than terminal app")
+	flag.BoolVar(&interactive, "i", false, "Interactive mode to do additional action")
 	flag.Parse()
 }
 
@@ -73,6 +76,22 @@ func run(filename string, stdout, stderr io.Writer, row, col int) error {
 	if err := renderer.Render(stdout, img); err != nil {
 		return err
 	}
+
+	if interactive {
+		fmt.Print("[d,q]? ")
+		l, err := bufio.NewReader(os.Stdin).ReadString('\n')
+		if err != nil {
+			return err
+		}
+		switch l[0] {
+		case 'd':
+			fmt.Println("OK, delete it.")
+			if err := os.Remove(filename); err != nil {
+				return fmt.Errorf("failed to delete file: %v", err)
+			}
+		}
+	}
+
 	return nil
 }
 
