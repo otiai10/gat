@@ -1,9 +1,8 @@
 module github.com/otiai10/gat
 
-go 1.12
+go 1.16
 
 require (
-	github.com/google/go-licenses v0.0.0-20200602185517-f29a4c695c3d // indirect
 	github.com/mattn/go-sixel v0.0.1
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/otiai10/mint v1.3.1
