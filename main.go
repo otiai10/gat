@@ -38,28 +38,52 @@ func init() {
 	flag.BoolVar(&printborder, "b", false, "Print border")
 	flag.StringVar(&placeholder, "t", "  ", "Placeholder text for grid cell")
 	flag.BoolVar(&usecell, "c", false, "Prefer cell grid output than terminal app")
-	flag.BoolVar(&interactive, "i", false, "Interactive mode to do additional action")
+	// flag.BoolVar(&interactive, "i", false, "Interactive mode to do additional action")
+	flag.BoolVar(&interactive, "i", false, "Interactive mode to delete each file")
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "%s: cat for image files\nExample:\n  %[1]s [options] file [...]\n\nOptions:\n", os.Args[0])
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 }
 
 func main() {
 	stdout, stderr := os.Stdout, os.Stderr
-	filename := flag.Arg(0)
-	err := run(filename, stdout, stderr, h, w)
+	filenames := flag.Args()
+	err := run(filenames, stdout, stderr, h, w)
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func run(filename string, stdout, stderr io.Writer, row, col int) error {
+func run(filenames []string, stdout, stderr io.Writer, row, col int) error {
 
 	if debug {
 		color.Dump(stderr)
-		if filename == "" {
+		if len(filenames) == 0 {
 			return nil
 		}
 	}
 
+	total := len(filenames)
+	if total == 0 {
+		fmt.Fprintln(stderr, "No files ")
+		flag.Usage()
+		return nil
+	}
+	for i, filename := range filenames {
+		if total > 0 && interactive {
+			clearTerminal(stdout)
+		}
+		if err := runFile(total, i, filename, stdout, stderr, row, col); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func runFile(total, index int, filename string, stdout, stderr io.Writer, row, col int) error {
 	rc, err := getInputReader(filename)
 	if err != nil {
 		return err
@@ -78,20 +102,22 @@ func run(filename string, stdout, stderr io.Writer, row, col int) error {
 	}
 
 	if interactive {
-		fmt.Print("[d,q]? ")
-		l, err := bufio.NewReader(os.Stdin).ReadString('\n')
+		fmt.Printf("(%d/%d) %s\nDelete? [y, n, q] ", index+1, total, filename)
+		line, err := bufio.NewReader(os.Stdin).ReadString('\n')
 		if err != nil {
 			return err
 		}
-		switch l[0] {
-		case 'd':
+		switch strings.Trim(line, "\n") {
+		case "y", "Y", "yes":
 			fmt.Println("OK, delete it.")
 			if err := os.Remove(filename); err != nil {
 				return fmt.Errorf("failed to delete file: %v", err)
 			}
+		case "q", "quit":
+			fmt.Println("OK, quit and exit.")
+			os.Exit(0)
 		}
 	}
-
 	return nil
 }
 
@@ -136,4 +162,8 @@ func getRenderer(usecell bool, row, col int, placeholder string, scale float64, 
 			Placeholder: placeholder,
 		}
 	}
+}
+
+func clearTerminal(w io.Writer) {
+	fmt.Fprintf(w, "\033c")
 }
