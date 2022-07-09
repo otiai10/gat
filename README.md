@@ -21,12 +21,16 @@ Graphical `cat` command
 # Install
 
 ```sh
-go get -u github.com/otiai10/gat
+go install github.com/otiai10/gat@latest
 ```
 
 # Options
 
 ```sh
+# Interactive deletion mode
+gat -i [imagefile]
+# then you'll see it and be asked if you wanna delete it.
+
 # iTerm and Sixel
 gat -S 0.5 [imagefile] # Scale of output image
 
