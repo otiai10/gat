@@ -15,14 +15,14 @@ func (border DebugBorder) Top(out io.Writer, cols int) {
 	fmt.Fprint(out, "  ") // keep space to row index on the left edge
 	for c := 1; c < cols-1; c++ {
 		s := "  " + border.Padding + fmt.Sprintf("%d", c-1)
-		fmt.Fprintf(out, s[len(s)-3:])
+		fmt.Fprint(out, s[len(s)-3:])
 	}
 }
 
 // Left ...
 func (border DebugBorder) Left(out io.Writer, row int) {
 	s := "  " + fmt.Sprintf("%d", row)
-	fmt.Fprintf(out, s[len(s)-2:])
+	fmt.Fprint(out, s[len(s)-2:])
 }
 
 // Right ...
