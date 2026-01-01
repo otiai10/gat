@@ -19,6 +19,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestRun(t *testing.T) {
+	// Save and restore rendering flags
+	origHalfblock, origTruecolor := halfblock, truecolor
+	defer func() { halfblock, truecolor = origHalfblock, origTruecolor }()
+	halfblock, truecolor = false, false
+
 	o, e := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
 	run([]string{"./samples/red.png"}, o, e, 2, 3)
 
@@ -61,6 +66,11 @@ func TestRun_DebugMode(t *testing.T) {
 }
 
 func TestRun_MultipleFiles(t *testing.T) {
+	// Save and restore rendering flags
+	origHalfblock, origTruecolor := halfblock, truecolor
+	defer func() { halfblock, truecolor = origHalfblock, origTruecolor }()
+	halfblock, truecolor = false, false
+
 	o, e := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
 	err := run([]string{"./samples/red.png", "./samples/red.png"}, o, e, 2, 3)
 	Expect(t, err).ToBe(nil)

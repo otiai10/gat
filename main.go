@@ -28,6 +28,8 @@ var (
 	scale       float64 = 1
 	usecell             = false
 	interactive         = false
+	halfblock           = true
+	truecolor           = true
 )
 
 func init() {
@@ -40,6 +42,8 @@ func init() {
 	flag.BoolVar(&usecell, "c", false, "Prefer cell grid output than terminal app")
 	// flag.BoolVar(&interactive, "i", false, "Interactive mode to do additional action")
 	flag.BoolVar(&interactive, "i", false, "Interactive mode to delete each file")
+	flag.BoolVar(&halfblock, "halfblock", true, "Use half-block characters for 2x vertical resolution")
+	flag.BoolVar(&truecolor, "truecolor", true, "Use 24-bit true color (modern terminals)")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "%s: cat for image files\nExample:\n  %[1]s [options] file [...]\n\nOptions:\n", os.Args[0])
 		flag.PrintDefaults()
@@ -158,6 +162,8 @@ func getRenderer(usecell bool, row, col int, placeholder string, scale float64, 
 			Col:         uint16(col),
 			Colorpicker: color.AverageColorPicker{},
 			Placeholder: placeholder,
+			HalfBlock:   halfblock,
+			TrueColor:   truecolor,
 		}
 	case render.ITermImageSupported():
 		return &render.ITerm{
@@ -177,6 +183,8 @@ func getRenderer(usecell bool, row, col int, placeholder string, scale float64, 
 			Col:         uint16(col),
 			Colorpicker: color.AverageColorPicker{},
 			Placeholder: placeholder,
+			HalfBlock:   halfblock,
+			TrueColor:   truecolor,
 		}
 	}
 }
