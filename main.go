@@ -146,11 +146,22 @@ func getInputReader(filename string) (io.ReadCloser, error) {
 
 func getRenderer(usecell bool, row, col int, placeholder string, scale float64, img image.Image) render.Renderer {
 	switch {
-	case !usecell && render.ITermImageSupported():
+	case usecell:
+		return &render.CellGrid{
+			Row:         uint16(row),
+			Col:         uint16(col),
+			Colorpicker: color.AverageColorPicker{},
+			Placeholder: placeholder,
+		}
+	case render.ITermImageSupported():
 		return &render.ITerm{
 			Scale: scale,
 		}
-	case !usecell && render.SixelSupported():
+	case render.KittySupported():
+		return &render.Kitty{
+			Scale: scale,
+		}
+	case render.SixelSupported():
 		return &render.Sixel{
 			Scale: scale,
 		}

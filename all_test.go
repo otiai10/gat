@@ -119,6 +119,22 @@ func TestGetRenderer_WithITerm(t *testing.T) {
 	Expect(t, ok).ToBe(true)
 }
 
+func TestGetRenderer_WithKittyEnv(t *testing.T) {
+	origKittyWindowID := os.Getenv("KITTY_WINDOW_ID")
+	origTermProgram := os.Getenv("TERM_PROGRAM")
+	defer func() {
+		os.Setenv("KITTY_WINDOW_ID", origKittyWindowID)
+		os.Setenv("TERM_PROGRAM", origTermProgram)
+	}()
+
+	os.Setenv("KITTY_WINDOW_ID", "1")
+	os.Setenv("TERM_PROGRAM", "")
+	img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	r := getRenderer(false, 10, 20, "  ", 1.0, img)
+	_, ok := r.(*render.Kitty)
+	Expect(t, ok).ToBe(true)
+}
+
 func TestClearTerminal(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	clearTerminal(buf)

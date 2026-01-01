@@ -21,6 +21,24 @@ func ITermImageSupported() bool {
 	return os.Getenv("TERM_PROGRAM") == "iTerm.app"
 }
 
+// KittySupported checks if the terminal supports Kitty Graphics Protocol.
+// Supported terminals: Kitty, WezTerm, Ghostty
+func KittySupported() bool {
+	// Check for Kitty terminal
+	if os.Getenv("KITTY_WINDOW_ID") != "" {
+		return true
+	}
+	// Check for Ghostty
+	if os.Getenv("TERM_PROGRAM") == "ghostty" {
+		return true
+	}
+	// Check for WezTerm (also supports Kitty protocol)
+	if os.Getenv("TERM_PROGRAM") == "WezTerm" {
+		return true
+	}
+	return false
+}
+
 // SixelSupported ...
 func SixelSupported() bool {
 	s, err := terminal.MakeRaw(1)
@@ -74,6 +92,8 @@ func GetDefaultRenderer() Renderer {
 	switch {
 	case ITermImageSupported():
 		return &ITerm{Scale: 1}
+	case KittySupported():
+		return &Kitty{Scale: 1}
 	case SixelSupported():
 		return &Sixel{Scale: 1}
 	default:

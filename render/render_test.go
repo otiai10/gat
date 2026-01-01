@@ -169,4 +169,129 @@ func TestRenderer_Interface(t *testing.T) {
 	var _ Renderer = &CellGrid{}
 	var _ Renderer = &ITerm{}
 	var _ Renderer = &Sixel{}
+	var _ Renderer = &Kitty{}
+}
+
+func TestKitty_Render(t *testing.T) {
+	img := createTestImage(100, 100, color.RGBA{255, 0, 0, 255})
+	buf := bytes.NewBuffer(nil)
+
+	kitty := &Kitty{Scale: 1}
+	err := kitty.Render(buf, img)
+	if err != nil {
+		t.Fatalf("Kitty.Render() error = %v", err)
+	}
+
+	output := buf.Bytes()
+	if len(output) == 0 {
+		t.Error("Kitty.Render() produced no output")
+	}
+
+	// Check that output contains Kitty Graphics Protocol escape sequence
+	// Format: <ESC>_G...
+	if !bytes.Contains(output, []byte("\x1b_G")) {
+		t.Error("Kitty.Render() output does not contain expected escape sequence \\x1b_G")
+	}
+
+	// Check that output contains the action and format parameters
+	if !bytes.Contains(output, []byte("a=T")) {
+		t.Error("Kitty.Render() output does not contain action parameter a=T")
+	}
+	if !bytes.Contains(output, []byte("f=100")) {
+		t.Error("Kitty.Render() output does not contain format parameter f=100")
+	}
+
+	// Check that output ends with the terminator
+	if !bytes.Contains(output, []byte("\x1b\\")) {
+		t.Error("Kitty.Render() output does not contain terminator \\x1b\\")
+	}
+}
+
+func TestKitty_Render_LargeImage(t *testing.T) {
+	// Create a larger image with varied colors to ensure PNG doesn't compress too much
+	// This ensures the base64 output exceeds 4096 bytes and requires chunking
+	img := image.NewRGBA(image.Rect(0, 0, 800, 800))
+	for y := 0; y < 800; y++ {
+		for x := 0; x < 800; x++ {
+			// Create a gradient pattern that doesn't compress well
+			img.Set(x, y, color.RGBA{uint8(x % 256), uint8(y % 256), uint8((x + y) % 256), 255})
+		}
+	}
+	buf := bytes.NewBuffer(nil)
+
+	kitty := &Kitty{Scale: 1}
+	err := kitty.Render(buf, img)
+	if err != nil {
+		t.Fatalf("Kitty.Render() error = %v", err)
+	}
+
+	output := buf.Bytes()
+	// For large images, we should see m=1 (more chunks) followed by m=0 (last chunk)
+	if !bytes.Contains(output, []byte("m=1")) {
+		t.Error("Kitty.Render() large image should have m=1 for chunked transfer")
+	}
+	if !bytes.Contains(output, []byte("m=0")) {
+		t.Error("Kitty.Render() large image should have m=0 for final chunk")
+	}
+}
+
+func TestKitty_SetScale(t *testing.T) {
+	kitty := &Kitty{}
+	err := kitty.SetScale(2.0)
+	if err != nil {
+		t.Errorf("Kitty.SetScale() unexpected error = %v", err)
+	}
+	if kitty.Scale != 2.0 {
+		t.Errorf("Kitty.SetScale() Scale = %v, want 2.0", kitty.Scale)
+	}
+}
+
+func TestKittySupported(t *testing.T) {
+	// Save original env
+	origKittyWindowID := os.Getenv("KITTY_WINDOW_ID")
+	origTermProgram := os.Getenv("TERM_PROGRAM")
+	defer func() {
+		os.Setenv("KITTY_WINDOW_ID", origKittyWindowID)
+		os.Setenv("TERM_PROGRAM", origTermProgram)
+	}()
+
+	t.Run("Kitty terminal", func(t *testing.T) {
+		os.Setenv("KITTY_WINDOW_ID", "1")
+		os.Setenv("TERM_PROGRAM", "")
+		if !KittySupported() {
+			t.Error("KittySupported() = false, want true for Kitty terminal")
+		}
+	})
+
+	t.Run("Ghostty terminal", func(t *testing.T) {
+		os.Setenv("KITTY_WINDOW_ID", "")
+		os.Setenv("TERM_PROGRAM", "ghostty")
+		if !KittySupported() {
+			t.Error("KittySupported() = false, want true for Ghostty")
+		}
+	})
+
+	t.Run("WezTerm terminal", func(t *testing.T) {
+		os.Setenv("KITTY_WINDOW_ID", "")
+		os.Setenv("TERM_PROGRAM", "WezTerm")
+		if !KittySupported() {
+			t.Error("KittySupported() = false, want true for WezTerm")
+		}
+	})
+
+	t.Run("unsupported terminal", func(t *testing.T) {
+		os.Setenv("KITTY_WINDOW_ID", "")
+		os.Setenv("TERM_PROGRAM", "Terminal.app")
+		if KittySupported() {
+			t.Error("KittySupported() = true, want false for Terminal.app")
+		}
+	})
+
+	t.Run("empty env", func(t *testing.T) {
+		os.Setenv("KITTY_WINDOW_ID", "")
+		os.Setenv("TERM_PROGRAM", "")
+		if KittySupported() {
+			t.Error("KittySupported() = true, want false for empty env")
+		}
+	})
 }
