@@ -14,9 +14,12 @@ Graphical `cat` command
 % gat https://raw.githubusercontent.com/otiai10/gat/master/samples/sample.png
 ```
 
-| in iTerm | in Sixel | "cell grid" mode (default) |
+| Platform | Terminal App | How it looks |
 |:-------:|:------:|:------:|
-| <img width="320px" src="https://user-images.githubusercontent.com/931554/44513376-26ed8280-a6f8-11e8-83df-f1f877228189.png"> | [waiting for PR] | <img width="320px" src="https://cloud.githubusercontent.com/assets/931554/11317166/b0b4a2ce-9066-11e5-8341-d536b22b656a.png"> |
+| iTerm2<br>inline images | iTerm2 | <img width="320px" src="./.github/assets/iterm.png"> |
+| Kitty | Ghostty | <img width="320px" src="./.github/assets/ghostty.png"> |
+| Sixel | WezTerm<br/>Windows Terminal | <img width="320px" src="./.github/assets/wezterm.png"> |
+| TrueColor | (any terminals) | <img width="320px" src="./.github/assets/truecolor.png"> |
 
 # Install
 
