@@ -2,9 +2,12 @@ package main
 
 import (
 	"bytes"
+	"image"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/otiai10/gat/render"
 
 	. "github.com/otiai10/mint"
 )
@@ -34,4 +37,90 @@ func TestRun(t *testing.T) {
 			Expect(t, err).Not().ToBe(nil)
 		})
 	})
+}
+
+func TestRun_NoFiles(t *testing.T) {
+	o, e := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
+	err := run([]string{}, o, e, 2, 3)
+	Expect(t, err).ToBe(nil)
+	// Should print "No files" message to stderr
+	Expect(t, e.String()).ToBe("No files \n")
+}
+
+func TestRun_DebugMode(t *testing.T) {
+	// Save and restore debug flag
+	origDebug := debug
+	defer func() { debug = origDebug }()
+
+	debug = true
+	o, e := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
+	err := run([]string{}, o, e, 2, 3)
+	Expect(t, err).ToBe(nil)
+	// Debug mode with no files should dump colors to stderr
+	Expect(t, len(e.String()) > 0).ToBe(true)
+}
+
+func TestRun_MultipleFiles(t *testing.T) {
+	o, e := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
+	err := run([]string{"./samples/red.png", "./samples/red.png"}, o, e, 2, 3)
+	Expect(t, err).ToBe(nil)
+	// Should have output for both files
+	Expect(t, len(o.String()) > 15).ToBe(true)
+}
+
+func TestRun_InvalidFile(t *testing.T) {
+	o, e := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
+	err := run([]string{"./nonexistent.png"}, o, e, 2, 3)
+	Expect(t, err).Not().ToBe(nil)
+}
+
+func TestRun_NotAnImage(t *testing.T) {
+	o, e := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
+	err := run([]string{"./main.go"}, o, e, 2, 3)
+	Expect(t, err).Not().ToBe(nil) // Should fail to decode as image
+}
+
+func TestGetInputReader_LocalFile(t *testing.T) {
+	rc, err := getInputReader("./samples/red.png")
+	Expect(t, err).ToBe(nil)
+	Expect(t, rc).Not().ToBe(nil)
+	rc.Close()
+}
+
+func TestGetInputReader_NonexistentFile(t *testing.T) {
+	rc, err := getInputReader("./nonexistent.png")
+	Expect(t, err).Not().ToBe(nil)
+	Expect(t, rc).ToBe(nil)
+}
+
+func TestGetRenderer_UseCellTrue(t *testing.T) {
+	img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	r := getRenderer(true, 10, 20, "  ", 1.0, img)
+	_, ok := r.(*render.CellGrid)
+	Expect(t, ok).ToBe(true)
+}
+
+func TestGetRenderer_UseCellFalse_NoITerm(t *testing.T) {
+	// TERM_PROGRAM is already set to "" in TestMain
+	img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	r := getRenderer(false, 10, 20, "  ", 1.0, img)
+	_, ok := r.(*render.CellGrid)
+	Expect(t, ok).ToBe(true)
+}
+
+func TestGetRenderer_WithITerm(t *testing.T) {
+	origTerm := os.Getenv("TERM_PROGRAM")
+	defer os.Setenv("TERM_PROGRAM", origTerm)
+
+	os.Setenv("TERM_PROGRAM", "iTerm.app")
+	img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	r := getRenderer(false, 10, 20, "  ", 2.0, img)
+	_, ok := r.(*render.ITerm)
+	Expect(t, ok).ToBe(true)
+}
+
+func TestClearTerminal(t *testing.T) {
+	buf := bytes.NewBuffer(nil)
+	clearTerminal(buf)
+	Expect(t, buf.String()).ToBe("\033c")
 }
