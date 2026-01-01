@@ -44,10 +44,10 @@ func init() {
 		fmt.Fprintf(os.Stderr, "%s: cat for image files\nExample:\n  %[1]s [options] file [...]\n\nOptions:\n", os.Args[0])
 		flag.PrintDefaults()
 	}
-	flag.Parse()
 }
 
 func main() {
+	flag.Parse()
 	stdout, stderr := os.Stdout, os.Stderr
 	filenames := flag.Args()
 	err := run(filenames, stdout, stderr, h, w)
