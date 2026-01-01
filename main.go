@@ -75,7 +75,7 @@ func run(filenames []string, stdout, stderr io.Writer, row, col int) error {
 		if total > 0 && interactive {
 			clearTerminal(stdout)
 		}
-		if err := runFile(total, i, filename, stdout, stderr, row, col); err != nil {
+		if err := runFile(total, i, filename, stdout, stderr, row, col, debug); err != nil {
 			return err
 		}
 	}
@@ -83,7 +83,7 @@ func run(filenames []string, stdout, stderr io.Writer, row, col int) error {
 	return nil
 }
 
-func runFile(total, index int, filename string, stdout, stderr io.Writer, row, col int) error {
+func runFile(total, index int, filename string, stdout, stderr io.Writer, row, col int, debug bool) error {
 	rc, err := getInputReader(filename)
 	if err != nil {
 		return err
@@ -96,6 +96,12 @@ func runFile(total, index int, filename string, stdout, stderr io.Writer, row, c
 	}
 
 	renderer := getRenderer(usecell, row, col, placeholder, scale, img)
+
+	if debug {
+		fmt.Fprintf(stderr, "[DEBUG] Renderer: %T\n", renderer)
+		fmt.Fprintf(stderr, "[DEBUG] TERM_PROGRAM=%s\n", os.Getenv("TERM_PROGRAM"))
+		fmt.Fprintf(stderr, "[DEBUG] KITTY_WINDOW_ID=%s\n", os.Getenv("KITTY_WINDOW_ID"))
+	}
 
 	if err := renderer.Render(stdout, img); err != nil {
 		return err
