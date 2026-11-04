@@ -24,10 +24,7 @@ func ITermImageSupported() bool {
 	if !inTmux() {
 		return iterm
 	}
-	if !iterm && os.Getenv("LC_TERMINAL") != "iTerm2" {
-		return false
-	}
-	return tmuxPassthroughAllowed()
+	return (iterm || os.Getenv("LC_TERMINAL") == "iTerm2") && tmuxPassthroughAllowed()
 }
 
 // KittySupported checks if the terminal supports Kitty Graphics Protocol.

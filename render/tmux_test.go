@@ -15,6 +15,9 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+// tmuxEnv is a sample value of TMUX set by tmux in a pane.
+const tmuxEnv = "/tmp/tmux-501/default,1,0"
+
 // stubTmuxPassthrough replaces the tmux query for the duration of the test.
 func stubTmuxPassthrough(t *testing.T, value string, err error) {
 	t.Helper()
@@ -35,16 +38,16 @@ func TestITermImageSupported_Tmux(t *testing.T) {
 		want        bool
 	}{
 		// AC-1
-		{"tmux/LC_TERMINAL/on", "/tmp/tmux-501/default,1,0", "tmux", "iTerm2", "on", nil, true},
-		{"tmux/LC_TERMINAL/all", "/tmp/tmux-501/default,1,0", "tmux", "iTerm2", "all", nil, true},
-		{"tmux/LC_TERMINAL/old tmux", "/tmp/tmux-501/default,1,0", "tmux", "iTerm2", "", nil, true},
-		{"old tmux/TERM_PROGRAM inherited/on", "/tmp/tmux-501/default,1,0", "iTerm.app", "", "on", nil, true},
+		{"tmux/LC_TERMINAL/on", tmuxEnv, "tmux", "iTerm2", "on", nil, true},
+		{"tmux/LC_TERMINAL/all", tmuxEnv, "tmux", "iTerm2", "all", nil, true},
+		{"tmux/LC_TERMINAL/old tmux", tmuxEnv, "tmux", "iTerm2", "", nil, true},
+		{"old tmux/TERM_PROGRAM inherited/on", tmuxEnv, "iTerm.app", "", "on", nil, true},
 		// AC-2
-		{"tmux/LC_TERMINAL/off", "/tmp/tmux-501/default,1,0", "tmux", "iTerm2", "off", nil, false},
-		{"tmux/TERM_PROGRAM inherited/off", "/tmp/tmux-501/default,1,0", "iTerm.app", "iTerm2", "off", nil, false},
-		{"tmux/query failed", "/tmp/tmux-501/default,1,0", "tmux", "iTerm2", "", queryErr, false},
-		{"tmux/unknown value", "/tmp/tmux-501/default,1,0", "tmux", "iTerm2", "maybe", nil, false},
-		{"tmux/not iTerm2", "/tmp/tmux-501/default,1,0", "tmux", "", "on", nil, false},
+		{"tmux/LC_TERMINAL/off", tmuxEnv, "tmux", "iTerm2", "off", nil, false},
+		{"tmux/TERM_PROGRAM inherited/off", tmuxEnv, "iTerm.app", "iTerm2", "off", nil, false},
+		{"tmux/query failed", tmuxEnv, "tmux", "iTerm2", "", queryErr, false},
+		{"tmux/unknown value", tmuxEnv, "tmux", "iTerm2", "maybe", nil, false},
+		{"tmux/not iTerm2", tmuxEnv, "tmux", "", "on", nil, false},
 		// AC-3
 		{"no tmux/iTerm.app", "", "iTerm.app", "", "off", queryErr, true},
 		{"no tmux/LC_TERMINAL only", "", "Apple_Terminal", "iTerm2", "on", nil, false},
@@ -76,7 +79,7 @@ func TestITerm_Render_Tmux(t *testing.T) {
 		t.Fatalf("unexpected output outside tmux: %q", plain.String())
 	}
 
-	t.Setenv("TMUX", "/tmp/tmux-501/default,1,0")
+	t.Setenv("TMUX", tmuxEnv)
 	wrapped := bytes.NewBuffer(nil)
 	if err := (&ITerm{}).Render(wrapped, img); err != nil {
 		t.Fatal(err)

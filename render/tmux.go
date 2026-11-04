@@ -25,7 +25,8 @@ var queryTmuxPassthrough = func() (string, error) {
 	if pane := os.Getenv("TMUX_PANE"); pane != "" {
 		args = append(args, "-t", pane)
 	}
-	out, err := exec.CommandContext(ctx, "tmux", append(args, "#{allow-passthrough}")...).Output()
+	args = append(args, "#{allow-passthrough}")
+	out, err := exec.CommandContext(ctx, "tmux", args...).Output()
 	return strings.TrimSpace(string(out)), err
 }
 
@@ -38,12 +39,7 @@ func tmuxPassthroughAllowed() bool {
 	if err != nil {
 		return false
 	}
-	switch v {
-	case "on", "all", "":
-		return true
-	default:
-		return false
-	}
+	return v == "on" || v == "all" || v == ""
 }
 
 // tmuxPassthrough wraps an escape sequence so that tmux passes it through to the outer terminal.
