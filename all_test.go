@@ -14,6 +14,7 @@ import (
 
 func TestMain(m *testing.M) {
 	os.Setenv("TERM_PROGRAM", "") // Force use CellGrid
+	os.Unsetenv("TMUX")           // Tests expect the behavior outside tmux
 	code := m.Run()
 	os.Exit(code)
 }

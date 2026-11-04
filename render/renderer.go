@@ -16,9 +16,15 @@ type Renderer interface {
 	SetScale(float64) error
 }
 
-// ITermImageSupported ...
+// ITermImageSupported reports whether the terminal is iTerm2 and can show inline images.
+// Inside tmux, TERM_PROGRAM is overwritten by tmux, so LC_TERMINAL (set by iTerm2) is also checked,
+// and tmux must allow passthrough so that the image sequence reaches iTerm2.
 func ITermImageSupported() bool {
-	return os.Getenv("TERM_PROGRAM") == "iTerm.app"
+	iterm := os.Getenv("TERM_PROGRAM") == "iTerm.app"
+	if !inTmux() {
+		return iterm
+	}
+	return (iterm || os.Getenv("LC_TERMINAL") == "iTerm2") && tmuxPassthroughAllowed()
 }
 
 // KittySupported checks if the terminal supports Kitty Graphics Protocol.

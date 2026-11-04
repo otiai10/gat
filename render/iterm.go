@@ -30,8 +30,13 @@ func (iterm *ITerm) Render(w io.Writer, img image.Image) error {
 	size := img.Bounds().Max
 	width := int(float64(size.X) * iterm.Scale)
 	height := int(float64(size.Y) * iterm.Scale)
-	fmt.Fprintf(w, "\033]1337;File=;width=%dpx;height=%dpx;inline=1:%s\a\n", width, height, encoded)
-	return nil
+	seq := fmt.Sprintf("\033]1337;File=;width=%dpx;height=%dpx;inline=1:%s\a", width, height, encoded)
+	if inTmux() {
+		// stellar:debt(scope) tmux drops a sequence larger than input-buffer-size (1MiB by default). upgrade: iTerm2 MultipartFile transfer
+		seq = tmuxPassthrough(seq)
+	}
+	_, err = fmt.Fprintln(w, seq)
+	return err
 }
 
 // SetScale ...

@@ -21,6 +21,18 @@ Graphical `cat` command
 | Sixel | WezTerm<br/>Windows Terminal | <img width="320px" src="./.github/assets/wezterm.png"> |
 | TrueColor | (any terminals) | <img width="320px" src="./.github/assets/truecolor.png"> |
 
+## tmux
+
+Inside tmux, iTerm2 inline images are sent through tmux's passthrough.
+tmux 3.3 or later requires it to be enabled in `~/.tmux.conf`:
+
+```
+set -g allow-passthrough on
+```
+
+Without it, `gat` falls back to other output (e.g. cell grid).
+Images larger than tmux's `input-buffer-size` (1MiB by default, as base64) are dropped by tmux.
+
 # Install
 
 ```sh
