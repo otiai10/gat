@@ -151,8 +151,12 @@ func TestGetDefaultRenderer(t *testing.T) {
 	t.Run("returns CellGrid for non-iTerm", func(t *testing.T) {
 		os.Setenv("TERM_PROGRAM", "")
 		r := GetDefaultRenderer()
-		if _, ok := r.(*CellGrid); !ok {
-			t.Errorf("GetDefaultRenderer() = %T, want *CellGrid", r)
+		g, ok := r.(*CellGrid)
+		if !ok {
+			t.Fatalf("GetDefaultRenderer() = %T, want *CellGrid", r)
+		}
+		if !g.HalfBlock || !g.TrueColor {
+			t.Errorf("GetDefaultRenderer() CellGrid HalfBlock=%v TrueColor=%v, want both true", g.HalfBlock, g.TrueColor)
 		}
 	})
 

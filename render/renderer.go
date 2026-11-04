@@ -107,6 +107,7 @@ func GetDefaultRenderer() Renderer {
 	case SixelSupported():
 		return &Sixel{Scale: 1}
 	default:
-		return &CellGrid{}
+		// Same cell-grid settings as the gat CLI: half-block characters in 24-bit color.
+		return &CellGrid{HalfBlock: true, TrueColor: true}
 	}
 }
