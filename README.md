@@ -11,7 +11,7 @@ Graphical `cat` command
 % gat ./samples/sample.png
 
 # By URL
-% gat https://raw.githubusercontent.com/otiai10/gat/master/samples/sample.png
+% gat https://raw.githubusercontent.com/otiai10/gat/main/samples/sample.png
 ```
 
 | Platform | Terminal App | How it looks |
@@ -55,7 +55,7 @@ r := render.GetDefaultRenderer()
 r.Render(os.Stdout, img)
 ```
 
-See https://godoc.org/github.com/otiai10/gat/render for more information.
+See https://pkg.go.dev/github.com/otiai10/gat/render for more information.
 
 # Thanks
 
