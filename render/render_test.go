@@ -2,8 +2,10 @@ package render
 
 import (
 	"bytes"
+	"encoding/base64"
 	"image"
 	"image/color"
+	"image/png"
 	"os"
 	"strings"
 	"testing"
@@ -306,6 +308,47 @@ func TestSixel_RenderWritesToGivenWriter(t *testing.T) {
 		}
 		if !strings.HasPrefix(buf.String(), "\x1bP") {
 			t.Errorf("Sixel.Render(scale=%v) output should start with DCS, got %q", scale, buf.String())
+		}
+	}
+}
+
+func kittyDecodedSize(t *testing.T, out string) image.Point {
+	t.Helper()
+	var payload strings.Builder
+	for _, seg := range strings.Split(out, "\x1b_G") {
+		if i := strings.Index(seg, ";"); i >= 0 {
+			payload.WriteString(strings.TrimSuffix(strings.TrimRight(seg[i+1:], "\n"), "\x1b\\"))
+		}
+	}
+	raw, err := base64.StdEncoding.DecodeString(payload.String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := png.DecodeConfig(bytes.NewReader(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return image.Pt(cfg.Width, cfg.Height)
+}
+
+func TestKitty_Render_Scale(t *testing.T) {
+	img := image.NewRGBA(image.Rect(0, 0, 100, 60))
+	for _, tc := range []struct {
+		scale float64
+		want  image.Point
+	}{
+		{0.5, image.Pt(50, 30)},
+		{0.25, image.Pt(25, 15)},
+		{1, image.Pt(100, 60)},
+		{2, image.Pt(100, 60)}, // shrink only
+		{0, image.Pt(100, 60)}, // unset means 1
+	} {
+		buf := bytes.NewBuffer(nil)
+		if err := (&Kitty{Scale: tc.scale}).Render(buf, img); err != nil {
+			t.Fatal(err)
+		}
+		if got := kittyDecodedSize(t, buf.String()); got != tc.want {
+			t.Errorf("Scale %v: got %v, want %v", tc.scale, got, tc.want)
 		}
 	}
 }
