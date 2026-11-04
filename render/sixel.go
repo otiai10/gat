@@ -3,25 +3,32 @@ package render
 import (
 	"image"
 	"io"
-	"os"
 
 	sixel "github.com/mattn/go-sixel"
-	"github.com/nfnt/resize"
+	"golang.org/x/image/draw"
 )
 
-// Sixel ...
+// Sixel renderer to support image printing on Sixel-capable terminals.
 // See https://github.com/saitoha/libsixel
 type Sixel struct {
 	Scale float64
 }
 
-// Render renders specified image to iTerm stdout.
+// Render renders specified image to w as Sixel graphics.
 func (sxl *Sixel) Render(w io.Writer, img image.Image) error {
-	size := img.Bounds().Max
-	width := uint(float64(size.X) * sxl.Scale)
-	height := uint(float64(size.Y) * sxl.Scale)
-	resized := resize.Thumbnail(width, height, img, resize.Bicubic)
-	return sixel.NewEncoder(os.Stdout).Encode(resized)
+	if sxl.Scale == 0 {
+		sxl.Scale = 1
+	}
+	// Like the previous nfnt/resize.Thumbnail implementation, only shrink, never enlarge.
+	if sxl.Scale < 1 {
+		size := img.Bounds().Size()
+		width := max(1, int(float64(size.X)*sxl.Scale))
+		height := max(1, int(float64(size.Y)*sxl.Scale))
+		dst := image.NewRGBA(image.Rect(0, 0, width, height))
+		draw.CatmullRom.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Src, nil)
+		img = dst
+	}
+	return sixel.NewEncoder(w).Encode(img)
 }
 
 // SetScale ...

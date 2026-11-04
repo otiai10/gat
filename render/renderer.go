@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 // Renderer interface.
@@ -39,18 +39,28 @@ func KittySupported() bool {
 	return false
 }
 
-// SixelSupported ...
+// sixelQueryTimeout is how long SixelSupported waits for the terminal to answer.
+const sixelQueryTimeout = 500 * time.Millisecond
+
+// SixelSupported reports whether the terminal attached to stdout supports Sixel graphics,
+// by sending a DA1 (Primary Device Attributes) query.
 func SixelSupported() bool {
-	s, err := terminal.MakeRaw(1)
+	fd := int(os.Stdout.Fd())
+	if !term.IsTerminal(fd) {
+		return false
+	}
+	s, err := term.MakeRaw(fd)
 	if err != nil {
 		return false
 	}
-	defer terminal.Restore(1, s)
-	_, err = os.Stdout.Write([]byte("\x1b[c"))
-	if err != nil {
+	defer term.Restore(fd, s)
+	if _, err := os.Stdout.Write([]byte("\x1b[c")); err != nil {
 		return false
 	}
-	defer readTimeout(os.Stdout, time.Time{})
+	// Do not block forever if the terminal does not answer the DA1 query.
+	// SetReadDeadline may be unsupported on some platforms; then it just blocks as before.
+	_ = os.Stdout.SetReadDeadline(time.Now().Add(sixelQueryTimeout))
+	defer os.Stdout.SetReadDeadline(time.Time{})
 
 	var b [100]byte
 	n, err := os.Stdout.Read(b[:])

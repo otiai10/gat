@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"os"
+	"strings"
 	"testing"
 
 	colorpkg "github.com/otiai10/gat/color"
@@ -294,4 +295,17 @@ func TestKittySupported(t *testing.T) {
 			t.Error("KittySupported() = true, want false for empty env")
 		}
 	})
+}
+
+func TestSixel_RenderWritesToGivenWriter(t *testing.T) {
+	img := createTestImage(20, 20, color.RGBA{0, 0, 255, 255})
+	for _, scale := range []float64{0, 1, 0.5} {
+		buf := bytes.NewBuffer(nil)
+		if err := (&Sixel{Scale: scale}).Render(buf, img); err != nil {
+			t.Fatalf("Sixel.Render(scale=%v) error = %v", scale, err)
+		}
+		if !strings.HasPrefix(buf.String(), "\x1bP") {
+			t.Errorf("Sixel.Render(scale=%v) output should start with DCS, got %q", scale, buf.String())
+		}
+	}
 }

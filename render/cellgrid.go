@@ -61,14 +61,7 @@ func (grid *CellGrid) Render(w io.Writer, img image.Image) error {
 		return fmt.Errorf("output canvas is too small: %+v", rect)
 	}
 
-	rowcount := int(rect.Row - 1)
-	// rowcount -= grid.Border.Width()
-	for i := 0; i < grid.Border.Width(); i++ {
-		rowcount--
-	}
-	if rowcount <= 0 {
-		rowcount = 1
-	}
+	rowcount := max(1, int(rect.Row)-1-grid.Border.Width())
 	colcount := int(float64(rowcount) * float64(img.Bounds().Max.X) / float64(img.Bounds().Max.Y))
 
 	// HalfBlock uses single char "▀" instead of placeholder (typically "  "),
