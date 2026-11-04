@@ -10,7 +10,7 @@ func Dump(out io.Writer) {
 	for i := range 256 {
 		fmt.Fprintf(out, "\x1b[48;5;%[1]dm %03[1]d\x1b[m", i)
 		if i%15 == 0 {
-			fmt.Print("\n")
+			fmt.Fprint(out, "\n")
 		}
 	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"image"
@@ -14,6 +15,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/otiai10/gat/color"
 	"github.com/otiai10/gat/render"
@@ -29,6 +31,12 @@ var (
 	usecell             = false
 	interactive         = false
 )
+
+// errQuit is returned when the user chooses to quit in interactive mode.
+var errQuit = errors.New("quit")
+
+// httpClient is used to fetch images given by URL.
+var httpClient = &http.Client{Timeout: 30 * time.Second}
 
 func init() {
 	flag.BoolVar(&debug, "debug", false, "Print debug information")
@@ -51,6 +59,9 @@ func main() {
 	stdout, stderr := os.Stdout, os.Stderr
 	filenames := flag.Args()
 	err := run(filenames, stdout, stderr, h, w)
+	if errors.Is(err, errQuit) {
+		return
+	}
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -71,11 +82,12 @@ func run(filenames []string, stdout, stderr io.Writer, row, col int) error {
 		flag.Usage()
 		return nil
 	}
+	stdin := bufio.NewReader(os.Stdin)
 	for i, filename := range filenames {
-		if total > 0 && interactive {
+		if interactive {
 			clearTerminal(stdout)
 		}
-		if err := runFile(total, i, filename, stdout, stderr, row, col, debug); err != nil {
+		if err := runFile(total, i, filename, stdin, stdout, stderr, row, col, debug); err != nil {
 			return err
 		}
 	}
@@ -83,7 +95,7 @@ func run(filenames []string, stdout, stderr io.Writer, row, col int) error {
 	return nil
 }
 
-func runFile(total, index int, filename string, stdout, stderr io.Writer, row, col int, debug bool) error {
+func runFile(total, index int, filename string, stdin *bufio.Reader, stdout, stderr io.Writer, row, col int, debug bool) error {
 	rc, err := getInputReader(filename)
 	if err != nil {
 		return err
@@ -108,20 +120,22 @@ func runFile(total, index int, filename string, stdout, stderr io.Writer, row, c
 	}
 
 	if interactive {
-		fmt.Printf("(%d/%d) %s\nDelete? [y, n, q] ", index+1, total, filename)
-		line, err := bufio.NewReader(os.Stdin).ReadString('\n')
+		fmt.Fprintf(stdout, "(%d/%d) %s\nDelete? [y, n, q] ", index+1, total, filename)
+		line, err := stdin.ReadString('\n')
 		if err != nil {
 			return err
 		}
-		switch strings.Trim(line, "\n") {
+		switch strings.TrimSpace(line) {
 		case "y", "Y", "yes":
-			fmt.Println("OK, delete it.")
+			fmt.Fprintln(stdout, "OK, delete it.")
+			// Close before removing, since Windows cannot remove an open file.
+			rc.Close()
 			if err := os.Remove(filename); err != nil {
-				return fmt.Errorf("failed to delete file: %v", err)
+				return fmt.Errorf("failed to delete file: %w", err)
 			}
 		case "q", "quit":
-			fmt.Println("OK, quit and exit.")
-			os.Exit(0)
+			fmt.Fprintln(stdout, "OK, quit and exit.")
+			return errQuit
 		}
 	}
 	return nil
@@ -135,14 +149,14 @@ func getInputReader(filename string) (io.ReadCloser, error) {
 	}
 	switch u.Scheme {
 	case "http", "https":
-		res, err := http.Get(u.String())
+		res, err := httpClient.Get(u.String())
 		if err != nil {
 			return nil, err
 		}
 		contenttype := res.Header.Get("Content-Type")
 		if !strings.HasPrefix(contenttype, "image") {
 			res.Body.Close()
-			return nil, fmt.Errorf("Content-Type is not image/*, but %v", contenttype)
+			return nil, fmt.Errorf("content-type is not image/*, but %v", contenttype)
 		}
 		return res.Body, nil
 	default:
