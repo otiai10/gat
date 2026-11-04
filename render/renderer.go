@@ -79,7 +79,7 @@ func SixelSupported() bool {
 	if n != -1 {
 		sb = sb[:n]
 	}
-	for _, t := range bytes.Split(sb, []byte(";")) {
+	for t := range bytes.SplitSeq(sb, []byte(";")) {
 		if len(t) == 1 && t[0] == '4' {
 			return true
 		}

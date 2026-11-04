@@ -9,8 +9,8 @@ import (
 // createTestImage creates a simple test image with a solid color
 func createTestImage(width, height int, c color.Color) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
+	for y := range height {
+		for x := range width {
 			img.Set(x, y, c)
 		}
 	}
@@ -20,8 +20,8 @@ func createTestImage(width, height int, c color.Color) *image.RGBA {
 // createGradientImage creates a gradient test image
 func createGradientImage(width, height int) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
+	for y := range height {
+		for x := range width {
 			gray := uint8((x + y) * 255 / (width + height))
 			img.Set(x, y, color.RGBA{gray, gray, gray, 255})
 		}

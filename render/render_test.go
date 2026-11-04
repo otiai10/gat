@@ -13,8 +13,8 @@ import (
 // createTestImage creates a simple test image with a solid color
 func createTestImage(width, height int, c color.Color) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
+	for y := range height {
+		for x := range width {
 			img.Set(x, y, c)
 		}
 	}
@@ -211,8 +211,8 @@ func TestKitty_Render_LargeImage(t *testing.T) {
 	// Create a larger image with varied colors to ensure PNG doesn't compress too much
 	// This ensures the base64 output exceeds 4096 bytes and requires chunking
 	img := image.NewRGBA(image.Rect(0, 0, 800, 800))
-	for y := 0; y < 800; y++ {
-		for x := 0; x < 800; x++ {
+	for y := range 800 {
+		for x := range 800 {
 			// Create a gradient pattern that doesn't compress well
 			img.Set(x, y, color.RGBA{uint8(x % 256), uint8(y % 256), uint8((x + y) % 256), 255})
 		}
