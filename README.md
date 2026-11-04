@@ -34,7 +34,7 @@ go install github.com/otiai10/gat@latest
 gat -i [imagefile]
 # then you'll see it and be asked if you wanna delete it.
 
-# iTerm and Sixel
+# iTerm, Kitty and Sixel
 gat -S 0.5 [imagefile] # Scale of output image
 
 # Only for cell grid mode
