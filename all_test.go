@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"image"
-	"io/ioutil"
+	"io"
 	"os"
 	"testing"
 
@@ -22,13 +22,13 @@ func TestRun(t *testing.T) {
 	o, e := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
 	run([]string{"./samples/red.png"}, o, e, 2, 3)
 
-	b, err := ioutil.ReadAll(o)
+	b, err := io.ReadAll(o)
 	Expect(t, err).ToBe(nil)
 	Expect(t, len(b) > 0).ToBe(true)
 
 	Because(t, "gat can accept image URL via http/https", func(t *testing.T) {
 		t.SkipNow()
-		err := run([]string{"https://raw.githubusercontent.com/otiai10/gat/master/samples/sample.png"}, o, e, 2, 3)
+		err := run([]string{"https://raw.githubusercontent.com/otiai10/gat/main/samples/sample.png"}, o, e, 2, 3)
 		Expect(t, err).ToBe(nil)
 		When(t, "given URL is not valid URL nor response is not image/*", func(t *testing.T) {
 			err = run([]string{"foobaa://github.com/otiai10/gat"}, o, e, 2, 3)

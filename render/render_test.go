@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"os"
+	"strings"
 	"testing"
 
 	colorpkg "github.com/otiai10/gat/color"
@@ -13,8 +14,8 @@ import (
 // createTestImage creates a simple test image with a solid color
 func createTestImage(width, height int, c color.Color) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
+	for y := range height {
+		for x := range width {
 			img.Set(x, y, c)
 		}
 	}
@@ -211,8 +212,8 @@ func TestKitty_Render_LargeImage(t *testing.T) {
 	// Create a larger image with varied colors to ensure PNG doesn't compress too much
 	// This ensures the base64 output exceeds 4096 bytes and requires chunking
 	img := image.NewRGBA(image.Rect(0, 0, 800, 800))
-	for y := 0; y < 800; y++ {
-		for x := 0; x < 800; x++ {
+	for y := range 800 {
+		for x := range 800 {
 			// Create a gradient pattern that doesn't compress well
 			img.Set(x, y, color.RGBA{uint8(x % 256), uint8(y % 256), uint8((x + y) % 256), 255})
 		}
@@ -294,4 +295,17 @@ func TestKittySupported(t *testing.T) {
 			t.Error("KittySupported() = true, want false for empty env")
 		}
 	})
+}
+
+func TestSixel_RenderWritesToGivenWriter(t *testing.T) {
+	img := createTestImage(20, 20, color.RGBA{0, 0, 255, 255})
+	for _, scale := range []float64{0, 1, 0.5} {
+		buf := bytes.NewBuffer(nil)
+		if err := (&Sixel{Scale: scale}).Render(buf, img); err != nil {
+			t.Fatalf("Sixel.Render(scale=%v) error = %v", scale, err)
+		}
+		if !strings.HasPrefix(buf.String(), "\x1bP") {
+			t.Errorf("Sixel.Render(scale=%v) output should start with DCS, got %q", scale, buf.String())
+		}
+	}
 }
