@@ -12,7 +12,7 @@ import (
 // Kitty renderer to support image printing using Kitty Graphics Protocol.
 // See https://sw.kovidgoyal.net/kitty/graphics-protocol/
 type Kitty struct {
-	// Scale size
+	// Scale size. Values below 1 shrink the image; 1 or more keep the original size.
 	Scale float64
 }
 
@@ -26,6 +26,10 @@ func (k *Kitty) Render(w io.Writer, img image.Image) error {
 	if k.Scale == 0 {
 		k.Scale = 1
 	}
+
+	// Kitty has no scale parameter of its own, so resize before encoding
+	// (shrink only, same as Sixel).
+	img = shrink(img, k.Scale)
 
 	// Encode image as PNG
 	buf := bytes.NewBuffer(nil)
